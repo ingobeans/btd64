@@ -4,6 +4,8 @@ __lua__
 --game data
 
 map_pts = {{-1,3},{9,3},{9,6},{1,6},{1,8},{11,8},{11,16}}
+gnd = 28
+gnd_clr = 3
 
 --speed,img,size,{splits to},{{color from,color to}}
 bloon_types = {
@@ -39,6 +41,14 @@ function spr_r(s,x,y,a,w,h)
  end
 end
 
+function indexof(array, value)
+	for i, v in ipairs(array) do
+		if v == value then
+			return i
+		end
+	end
+	return nil
+end
 -->8
 --game
 
@@ -46,16 +56,17 @@ round = 0
 playing = true
 
 function main()
-	mv_crsr()
+	player_input()
 	mv_bloons()
 
 	map()
-	draw_ui()
-	rect(crsr[1]*8-1, crsr[2]*8-1, crsr[1]*8+8, crsr[2]*8+8, 7)
 	
 	draw_bloons()
 	update_monkeys()
 	update_proj()
+	
+	rect(crsr[1]*8-1, crsr[2]*8-1, crsr[1]*8+8, crsr[2]*8+8, 7)
+	draw_ui()
 end
 
 function _update()
@@ -99,6 +110,10 @@ function mv_bloons()
 		if nx/8 == next_pt[1] and
 					ny/8 == next_pt[2] do
 		bloons[k][3] += 1
+		if next_pt > #map_pts then
+			lives -= 1
+			del(bloons,bloons[k])
+		end
 		end
 	end
 end
@@ -107,7 +122,37 @@ end
 
 cash = 650
 lives = 100
-crsr = {0,0}
+crsr = {8,8}
+
+function monkey_at(pos)
+	for k,v in pairs(monkeys) do
+		if pos[1] == v.p[1]-4 and
+					pos[2] == v.p[2]-4 then
+			return v,k
+		end
+	end
+	return false,false
+end
+
+function player_input()
+	if in_menu == -1 then
+		mv_crsr()
+		if btnp(❎) then
+			in_menu = 0
+		elseif btn(🅾️) then
+			crp = {crsr[1]*8,crsr[2]*8}
+			
+			m,i = monkey_at(crp)
+			if m != false then
+				in_menu = i
+			end
+		end
+	else
+		if btnp(❎) then
+			in_menu = -1
+		end
+	end
+end
 
 function mv_crsr()
 	if btnp(⬅️) do
@@ -150,6 +195,11 @@ function draw_menu()
 	rectborder(128-w,0,127,127,4,15)
 	if in_menu == 0 then
 		
+	else
+		m = monkeys[in_menu]
+		rectfill(129-w,1,126,9,0)
+		print("upgrade",129-w+12,1,7)
+		spr(m.i,128-w,0)
 	end
 end
 
@@ -213,11 +263,18 @@ monkeys = {}
 function update_monkeys()
 	for k,v in pairs(monkeys) do
 		a = atan2(v.lar[1],v.lar[2])*360-90
-		pal(0,3)
+		pal(0,gnd_clr)
 		spr_r(v.i, v.p[1]-4, v.p[2]-4,a,1,1)
 		pal()
-		circ(v.p[1],v.p[2],v.r*8,0)
-		v.a(v,k)
+		
+		if crsr[1]*8 == v.p[1]-4 and
+					crsr[2]*8 == v.p[2]-4 then
+			circ(v.p[1],v.p[2],v.r*8,0)
+		end
+		
+		if playing then
+			v.a(v,k)
+		end
 		if v.adc > 0 then
 			v.adc -= 1
 		end
@@ -251,21 +308,15 @@ function bloon_near(pos,r,sort)
 end
 
 function reg_attack(this)
-	print(#proj)
 	b,dx,dy,d =	bloon_near(this.p,this.r,0)
 	if b != 0 then
-		print(this.adc)
-		print(this.ad)
 		if this.adc == 0 then
 			this.adc = this.ad
-			print("shoot")
 			x = this.p[1]
 			y = this.p[2]
 			mx = dx/d
 			my = dy/d
 			this.lar = {mx,my}
-			print(mx.." "..my)
-			line(x,y,x+mx*this.r*8,y+my*this.r*8,7)
 			add(proj,{
 				{x,y},
 				{mx,my},
@@ -278,7 +329,7 @@ function reg_attack(this)
 	end
 end
 -->8
--- proj
+--proj
 
 --{x,y},{mx,my},s,pr,lead,cer
 proj = {}
