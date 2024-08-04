@@ -7,16 +7,26 @@ map_pts = {{-1,3},{9,3},{9,6},{1,6},{1,8},{11,8},{11,16}}
 gnd = 28
 gnd_clr = 3
 
---speed,img,size,{splits to},{{color from,color to}}
-bloon_types = {
-	{1, 48, 1, {}, {}},
-	{2, 48, 1, {1}, {8,12}},
+waves_data = {
+	{{10,2}},
+	{{20,1}},
+	{{40,1}},
+	{{30,1},{15,2}}
 }
+
+--raw wave data
+waves = {}
+for k,v in pairs(waves_data) do
+	waves[k] = {}
+	for _,g in pairs(v) do
+		for l=1,g[1] do
+			add(waves[k],g[2])
+		end
+	end
+end
 
 function _init()
 	def_monkeys()
-	spwn_monkey({9*8+4,2*8+4},1)
-	spwn_monkey({10*8+4,2*8+4},1)
 	spwn_monkey({7*8+4,4*8+4},1)
 end
 
@@ -24,7 +34,41 @@ end
 --game
 
 round = 0
-playing = true
+playing = false
+spawning = true
+spawn_index = 0
+spawn_timer = 0
+spawn_delay = 5
+
+function start_round()
+	round += 1
+	playing = true
+	spawning = true
+	spawn_index = 1
+	spawn_timer = spawn_delay
+end
+
+function spawn_bloons()
+	if playing and spawning then
+		spawn_timer -= 1
+		if spawn_timer == 0 then
+			spawn_timer = spawn_delay
+			t = waves[round][spawn_index]
+			sx = map_pts[1][1]*8
+			sy = map_pts[1][2]*8
+			spawn_bloon({sx,sy},t)
+			spawn_index += 1
+			if spawn_index > #waves[round] then
+				spawning = false
+			end
+		end
+	elseif playing then
+		if #bloons == 0 then
+			cash += 100
+			playing = false
+		end
+	end
+end
 
 function main()
 	player_input()
@@ -38,6 +82,7 @@ function main()
 	
 	rect(crsr[1]*8-1, crsr[2]*8-1, crsr[1]*8+8, crsr[2]*8+8, 7)
 	draw_ui()
+	spawn_bloons()
 end
 
 function _update()
@@ -46,12 +91,30 @@ end
 -->8
 --bloons
 
-bloons = {{1,{-8,24},1}}
+--speed,img,size,{splits to},{{color from,color to}}
+bloon_types = {
+	{1, 48, 1, {}, {}},
+	{1.5, 48, 1, {1,1}, {{8,12}}},
+}
+
+bloons = {}
+
+function pop_bloon()
+
+function spawn_bloon(pos,t)
+	add(bloons, {t, pos, 1, 0})
+end
 
 function draw_bloons()
 	for k,v in pairs(bloons) do
-		img = bloon_types[v[1]][2]
+		bt = bloon_types[v[1]]
+		img = bt[2]
+		pcs = bt[5]
+		for k,v in pairs(pcs) do
+			pal(v[1], v[2])
+		end
 		spr(img, v[2][1], v[2][2])
+		pal()
 	end
 end
 
@@ -61,21 +124,26 @@ function mv_bloons()
 		pt = map_pts[v[3]]
 		spd = bloon_types[v[1]][1]
 		next_pt = map_pts[v[3]+1]
+		dix = v[2][1]-next_pt[1]*8
+		diy = v[2][2]-next_pt[2]*8
+		ma = 0
 		
-		if v[2][1] < next_pt[1]*8 then
-			mv[1] = spd
-		elseif v[2][1] > next_pt[1]*8 then
-			mv[1] = -spd
+		if dix < 0 then
+			mv[1] = min(spd,-dix)
+		elseif dix > 0 then
+			mv[1] = -min(spd,dix)
 		end
-		if v[2][2] < next_pt[2]*8 then
-			mv[2] = spd
-		elseif v[2][2] > next_pt[2]*8 then
-			mv[2] = -spd
+		if diy < 0 then
+			mv[2] = min(spd,-diy)
+		elseif diy > 0 then
+			mv[2] = -min(spd,diy)
 		end
 		
 		nx = v[2][1] + mv[1]
 		ny = v[2][2] + mv[2]
+		ma = mv[1] + mv[2]
 		
+		v[4] += ma
 		v[2] = {nx, ny}
 		
 		if nx/8 == next_pt[1] and
@@ -108,18 +176,19 @@ end
 function player_input()
 	if in_menu == -1 then
 		mv_crsr()
-		if btnp(❎) then
+		if btnp(🅾️) then
 			in_menu = 0
-		elseif btn(🅾️) then
+		elseif btn(❎) then
 			crp = {crsr[1]*8,crsr[2]*8}
 			
 			m,i = monkey_at(crp)
 			if m != false then
+				menu_crsr = 0
 				in_menu = i
 			end
 		end
 	else
-		if btnp(❎) then
+		if btnp(🅾️) then
 			in_menu = -1
 		end
 	end
@@ -155,22 +224,67 @@ end
 -- 0 build
 -- <monkey id> upgrade
 in_menu = -1
+menu_crsr = 0
 
 function rectborder(x1,y1,x2,y2,clr1,clr2)
 	rectfill(x1,y1,x2,y2,clr1)
 	rect(x1,y1,x2,y2,clr2)
 end
 
+function mv_menu_crsr()
+	if btnp(⬆️) then
+		menu_crsr -= 1
+	elseif btnp(⬇️) then
+		menu_crsr += 1
+	end
+	mx = 2
+	if in_menu == 0 then
+		mx = #monkey_types
+	end
+	if menu_crsr < 0 then
+		menu_crsr = 0
+	elseif menu_crsr > mx then
+		menu_crsr = mx
+	end
+end
+
+function menu_input()
+	mv_menu_crsr()
+	if in_menu == 0 then
+		if btnp(❎) then
+			if menu_crsr == 0 
+						and not playing then
+					start_round()
+			end
+	 end
+	end
+end
+
 function draw_menu()
+	menu_input()
 	w = 48
 	rectborder(128-w,0,127,127,4,15)
 	if in_menu == 0 then
-		
+		if not playing then
+			rectfill(129-w,1,126,10,12)
+			print("start round",130-w,2,15)
+		else
+			rectfill(129-w,1,126,10,1)
+			print("start round",130-w,2,5)
+		end
+		--draw monkey buttons
+		for k,v in pairs(monkey_types) do
+			rectfill(128-w,k*10,128-w+9,10+k*10,0)
+			rect(128-w,k*10,127,10+k*10,15)
+			spr(v.i,129-w,k*10+1)
+			print("$"..v.c,128-w+12,k*10+2,15)
+		end
+		spr(10,128-w-8,menu_crsr*10)
 	else
 		m = monkeys[in_menu]
 		rectfill(129-w,1,126,9,0)
-		print("upgrade",129-w+12,1,7)
-		spr(m.i,128-w,0)
+		print("upgrade",129-w+12,2,7)
+		spr(m.i,129-w,1)
 	end
 end
 
@@ -183,6 +297,7 @@ end
 
 function draw_topbar()
 	rectfill(0,0,128,8,0)
+	
 	
 	round_clr = 7
 	if playing then
@@ -197,13 +312,34 @@ end
 
 monkey_types = {}
 
+base = {
+	p={0,0},
+	c=200,
+	i=1,
+	r=2,
+	a=reg_attack,
+	ps=3,
+	pp=1,
+	pr=1,
+	pl=10,
+	l=false,
+	cer=false,
+	adc=0,
+	ad=10,
+	lar={0,0},
+	u1={},
+	u2={}
+}
+
 function def_monkeys()
+	mdart = copy(base)
 	mdart = {
 		p={0,0},
+		c=200,
 		i=1,
 		r=2,
 		a=reg_attack,
-		ps=4,
+		ps=3,
 		pp=1,
 		pr=1,
 		pl=10,
@@ -272,7 +408,7 @@ function bloon_near(pos,r,sort)
 		dx = (x-tx)
 		dy = (y-ty)
 		d = sqrt(dx^2+dy^2)
-		if d < r*8+4 then
+		if d < r then
 			return v,dx,dy,d
 		end
 	end
@@ -280,7 +416,7 @@ function bloon_near(pos,r,sort)
 end
 
 function reg_attack(this)
-	b,dx,dy,d =	bloon_near(this.p,this.r,0)
+	b,dx,dy,d =	bloon_near(this.p,this.r*8+4,0)
 	if b != 0 then
 		if this.adc == 0 then
 			this.adc = this.ad
@@ -329,6 +465,14 @@ function update_proj()
 		v[8] += 1
 		if v[8] == v[4] then
 			del(proj,v)
+		else
+			b,dx,dy,d = bloon_near(v[1],2,0)
+			if b != 0 then
+				print("hit",22,22)
+				cash += 1
+				del(bloons,b)
+				del(proj,v)
+			end
 		end
 	end
 end
@@ -377,12 +521,12 @@ function indexof(array, value)
 end
 __gfx__
 00000000000000000e00e000000000000000000000000000000000000000000000000000000000000000000033bbbb3333333333333333333333333333333333
-00000000000000060066660e00000000000000000000000000000000000000000000000000000000000000003bbbbbb333383333355555555555555555555553
-0070070000444404065ee56000000000000000000000000000000000000000000000000000000000000000003bbbbbb333883833355555555555555555555553
-0007700004144144e6e55e6000000000000000000000000000000000000000000000000000000000000000003bbbbbb3333bb333355555555555555555555553
-000770000444444406e55e6e0000000000000000000000000000000000000000000000000000000000000000bbbbbbbb333b3333355555555555555555555553
-0070070008888880065ee5600000000000000000000000000000000000000000000000000000000000000000bbbbbbbb3b3b3b33355555555555555555555553
-0000000000444400e06666000000000000000000000000000000000000000000000000000000000000000000bbbbbbbb33bbb333355555555555555555555553
+00000000000000060066660e00000004000000000000000000000000000000000000000000000000000000003bbbbbb333383333355555555555555555555553
+0070070000444404065ee560008888080000000000000000000000000000000000000000000000000000a0003bbbbbb333883833355555555555555555555553
+0007700004144144e6e55e60041441880000000000000000000000000000000000000000000000000000aa003bbbbbb3333bb333355555555555555555555553
+000770000444444406e55e6e088888880000000000000000000000000000000000000000000000000000aaa0bbbbbbbb333b3333355555555555555555555553
+0070070008888880065ee560088888800000000000000000000000000000000000000000000000000000aa00bbbbbbbb3b3b3b33355555555555555555555553
+0000000000444400e0666600008888000000000000000000000000000000000000000000000000000000a000bbbbbbbb33bbb333355555555555555555555553
 0000000000000000000e00e00000000000000000000000000000000000000000000000000000000000000000bbbbbbbb33333333355555533333333335555553
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003bbbbbb333333333355555533333333335555553
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003344443333333333355555533333333335555553
@@ -392,13 +536,13 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003344443333333333355555533333333335555553
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003344443333333333355555533333333335555553
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003333333333333333355555533333333335555553
-00000000000064000000000000000000000000000000000000000000000000000000000000000077770000000001111cc1111000355555533333333335555553
-00000000000004400000000000000000000000000000000000000000000000000000000000000777777000000000011cc1100000355555555555555555555553
-000000000004444000000000000000000000000000000000000000000000000000000000000077cccc770000000001cccc100000355555555555555555555553
-0000000000441480000000000000000000000000110000c7cccc00000000cccc7c00001100007cccccc700000000077777700000355555555555555555555553
-000000000414484000000000000000000000000011007cc7cccc770000777ccc7cc70011000cccccccccc00000007cccccc70000355555555555555555555553
-00000000044484000000000000000000000000001117ccc7ccccc770077ccccc7ccc7111000cccccccccc0000000cccccccc0000355555555555555555555553
-000000000048400000000000000000000000000011c7ccc7cccccc7777cccccc7ccc7c11000cccccccccc000000cccc77cccc000355555555555555555555553
+00000000000000000000000000000000000000000000000000000000000000000000000000000077770000000001111cc1111000355555533333333335555553
+00000000000000000000000000000000000000000000000000000000000000000000000000000777777000000000011cc1100000355555555555555555555553
+000000000000000000000000000000000000000000000000000000000000000000000000000077cccc770000000001cccc100000355555555555555555555553
+0000000000000000000000000000000000000000110000c7cccc00000000cccc7c00001100007cccccc700000000077777700000355555555555555555555553
+000000000000000000000000000000000000000011007cc7cccc770000777ccc7cc70011000cccccccccc00000007cccccc70000355555555555555555555553
+00000000000000000000000000000000000000001117ccc7ccccc770077ccccc7ccc7111000cccccccccc0000000cccccccc0000355555555555555555555553
+000000000000000000000000000000000000000011c7ccc7cccccc7777cccccc7ccc7c11000cccccccccc000000cccc77cccc000355555555555555555555553
 0000000000000000000000000000000000000000ccc7cc77cccccc7777cccccc77cc7ccc000cccccccccc0000007777777777000333333333333333333333333
 00888800006665000044440000dddd0000dddd00ccc7cc77cccccc7777cccccc77cc7ccc0007777777777000000cccccccccc000000000000000000000000000
 0888888006655550094444900dddddd00dddddd011c7ccc7cccccc7777cccccc7ccc7c11000cccc77cccc000000cccccccccc000000000000000000000000000
