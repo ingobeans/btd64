@@ -16,39 +16,10 @@ bloon_types = {
 function _init()
 	def_monkeys()
 	spwn_monkey({9*8+4,2*8+4},1)
+	spwn_monkey({10*8+4,2*8+4},1)
+	spwn_monkey({7*8+4,4*8+4},1)
 end
 
-function spr_r(s,x,y,a,w,h)
- sw=(w or 1)*8
- sh=(h or 1)*8
- sx=(s%8)*8
- sy=flr(s/8)*8
- x0=flr(0.5*sw)
- y0=flr(0.5*sh)
- a=a/360
- sa=sin(a)
- ca=cos(a)
- for ix=0,sw-1 do
-  for iy=0,sh-1 do
-   dx=ix-x0
-   dy=iy-y0
-   xx=flr(dx*ca-dy*sa+x0)
-   yy=flr(dx*sa+dy*ca+y0)
-   if (xx>=0 and xx<sw and yy>=0 and yy<=sh) then
-    pset(x+ix,y+iy,sget(sx+xx,sy+yy))
-   end
-  end
- end
-end
-
-function indexof(array, value)
-	for i, v in ipairs(array) do
-		if v == value then
-			return i
-		end
-	end
-	return nil
-end
 -->8
 --game
 
@@ -105,14 +76,14 @@ function mv_bloons()
 		nx = v[2][1] + mv[1]
 		ny = v[2][2] + mv[2]
 		
-		bloons[k][2] = {nx, ny}
+		v[2] = {nx, ny}
 		
 		if nx/8 == next_pt[1] and
 					ny/8 == next_pt[2] do
-			bloons[k][3] += 1
-			if bloons[k][3] >= #map_pts then
+			v[3] += 1
+			if v[3] >= #map_pts then
 				lives -= 1
-				bloons[k][3] = 0
+				del(bloons,v)
 			end
 		end
 	end
@@ -235,6 +206,7 @@ function def_monkeys()
 		ps=4,
 		pp=1,
 		pr=1,
+		pl=10,
 		l=false,
 		cer=false,
 		adc=0,
@@ -262,11 +234,11 @@ monkeys = {}
 
 function update_monkeys()
 	for k,v in pairs(monkeys) do
-		a = atan2(v.lar[1],v.lar[2])*360-90
+		a = atan2(v.lar[2],v.lar[1])*360-180
 		pal(0,gnd_clr)
 		spr_r(v.i, v.p[1]-4, v.p[2]-4,a,1,1)
 		pal()
-		
+
 		if crsr[1]*8 == v.p[1]-4 and
 					crsr[2]*8 == v.p[2]-4 then
 			circ(v.p[1],v.p[2],v.r*8,0)
@@ -282,7 +254,7 @@ function update_monkeys()
 end
 
 function spwn_monkey(pos,ti)
-	n = monkey_types[ti]
+	n = copy(monkey_types[ti])
 	n.p = pos
 	add(monkeys,n)
 end
@@ -300,7 +272,7 @@ function bloon_near(pos,r,sort)
 		dx = (x-tx)
 		dy = (y-ty)
 		d = sqrt(dx^2+dy^2)
-		if d < r*8 then
+		if d < r*8+4 then
 			return v,dx,dy,d
 		end
 	end
@@ -317,29 +289,91 @@ function reg_attack(this)
 			mx = dx/d
 			my = dy/d
 			this.lar = {mx,my}
-			add(proj,{
+			spwn_proj(
 				{x,y},
 				{mx,my},
 				this.ps,
+				this.pl,
 				this.pr,
 				this.l,
 				this.c
-			})
+			)
 		end
 	end
 end
 -->8
 --proj
 
---{x,y},{mx,my},s,pr,lead,cer
+--{x,y},{mx,my},ps,pl,pr,lead,cer,lifec,popc
 proj = {}
+
+function spwn_proj(pos,mv,spd,lifetime,prc,lead,cer)
+	add(proj,{
+			pos,
+			mv,
+			spd,
+			lifetime,
+			prc,
+			lead,
+			cer,
+			0,
+			0
+		})
+end
 
 function update_proj()
 	for k,v in pairs(proj) do
 		circ(v[1][1],v[1][2],1,0)
 		v[1][1] += v[2][1] * v[3]
 		v[1][2] += v[2][2] * v[3]
+		v[8] += 1
+		if v[8] == v[4] then
+			del(proj,v)
+		end
 	end
+end
+-->8
+--functions
+
+
+function spr_r(s,x,y,a,w,h)
+ sw=(w or 1)*8
+ sh=(h or 1)*8
+ sx=(s%8)*8
+ sy=flr(s/8)*8
+ x0=flr(0.5*sw)
+ y0=flr(0.5*sh)
+ a=a/360
+ sa=sin(a)
+ ca=cos(a)
+ for ix=0,sw-1 do
+  for iy=0,sh-1 do
+   dx=ix-x0
+   dy=iy-y0
+   xx=flr(dx*ca-dy*sa+x0)
+   yy=flr(dx*sa+dy*ca+y0)
+   if (xx>=0 and xx<sw and yy>=0 and yy<=sh) then
+    pset(x+ix,y+iy,sget(sx+xx,sy+yy))
+   end
+  end
+ end
+end
+
+function copy(org)
+	t = {}
+	for key, value in pairs(org) do
+  t[key] = value
+	end
+	return t
+end
+
+function indexof(array, value)
+	for i, v in ipairs(array) do
+		if v == value then
+			return i
+		end
+	end
+	return nil
 end
 __gfx__
 00000000000000000e00e000000000000000000000000000000000000000000000000000000000000000000033bbbb3333333333333333333333333333333333
