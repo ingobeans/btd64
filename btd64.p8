@@ -91,14 +91,14 @@ function mv_bloons()
 		spd = bloon_types[v[1]][1]
 		next_pt = map_pts[v[3]+1]
 		
-		if pt[1] < next_pt[1] then
+		if v[2][1] < next_pt[1]*8 then
 			mv[1] = spd
-		elseif pt[1] > next_pt[1] then
+		elseif v[2][1] > next_pt[1]*8 then
 			mv[1] = -spd
 		end
-		if pt[2] < next_pt[2] then
+		if v[2][2] < next_pt[2]*8 then
 			mv[2] = spd
-		elseif pt[2] > next_pt[2] then
+		elseif v[2][2] > next_pt[2]*8 then
 			mv[2] = -spd
 		end
 		
@@ -109,11 +109,11 @@ function mv_bloons()
 		
 		if nx/8 == next_pt[1] and
 					ny/8 == next_pt[2] do
-		bloons[k][3] += 1
-		if next_pt > #map_pts then
-			lives -= 1
-			del(bloons,bloons[k])
-		end
+			bloons[k][3] += 1
+			if bloons[k][3] >= #map_pts then
+				lives -= 1
+				bloons[k][3] = 0
+			end
 		end
 	end
 end
