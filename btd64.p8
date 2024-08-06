@@ -92,6 +92,7 @@ function main()
 	draw_particles()
 	empty_bloons_buffer()
 	spawn_bloons()
+	--perf_o(0,12)
 end
 
 function _update()
@@ -505,36 +506,30 @@ function draw_menu()
 		for k,v in pairs(buttons) do
 			if v == 0 then
 				rect(128-w,k*10,127,10+k*10,15)
-				spr(80,130-w,k*10+2)
-				print("locked",128-w+12,k*10+2,15)
+				spr(80,130-w+3,k*10+2)
+				print("locked",128-w+12+3,k*10+2,15)
 			elseif v == 1 then
 				rect(128-w,k*10,127,10+k*10,15)
-				print("max upg.",128-w+2,k*10+2,15)
+				print("max upg.",128-w+2+3,k*10+2,15)
 			else
-				rectfill(128-w,k*10,128-w+9,10+k*10,0)				
+				rectfill(128-w+3,k*10,128-w+9+3,10+k*10,0)				
 				rect(128-w,k*10,127,10+k*10,15)
-				spr(v[2],130-w,k*10+2)
-				print("$"..v[1],128-w+12,k*10+2,15)
+				spr(v[2],130-w+3,k*10+2)
+				print("$"..v[1],128-w+12+3,k*10+2,15)
 			end
 		end
 		
 		--draw upgrade progress
-		ps = 3
 		for k,v in pairs({m.ui1,m.ui2}) do
 			for i=1,3 do
 				c = 3
 				
-				--if path is locked
-				if buttons[k] == 0 then
-					c = 0
-				end
-				
 				--if upgrade is bought
-				if i<v then
+				if 4-i<v then
 					c = 11
 				end 
 				
-				rectfill(127-ps,k*10+i*ps-ps+1,126,k*10+i*ps,c)
+				rectfill(129-w,k*10+i*3-3+1,128-w+3,k*10+i*3,c)
 			end
 		end
 		
@@ -621,6 +616,7 @@ function new_mk(t)
 		pvr=1, --proj variant
 		pmom=1, --proj moab dmg multi
 		phfn=nil, --proj hit func
+		pshfn=nil, --post shoot func
 		l=false, --lead
 		cer=false, --ceramic
 		adc=0, --attack delay counter
@@ -810,7 +806,10 @@ function update_monkeys()
 		end
 		
 		if playing then
-			v.a(v,k)
+			v.a(v)
+			if v.pshfn != nil then
+				v.pshfn(v)				
+			end
 		end
 		if v.adc > 0 then
 			v.adc -= gspd
@@ -1079,7 +1078,6 @@ end
 -->8
 --functions
 
-
 function dir_to(sp,tp)
 	x = sp[1]
 	y = sp[2]
@@ -1089,6 +1087,18 @@ function dir_to(sp,tp)
 	dy = y-ty
 	d = sqrt(dx^2+dy^2)
 	return {dx/d, dy/d}
+end
+
+function perf_o(x,y)
+	x = x or 0
+	y = y or 0
+	rectfill(x,y,x+45,y+12,0)
+	cursor(x+1,y+1)
+	color(7)
+	mem = stat(0)
+	cpu = stat(1)
+	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
+	print("cpu:"..tostr(flr(cpu*100)).."%")
 end
 
 function has_value (tab, val)
