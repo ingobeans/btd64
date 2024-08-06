@@ -12,7 +12,7 @@ waves_data = {
 	{25,{20,1}},
 	{15,{40,1}},
 	{15,{30,1},{15,2}},
-	{15,{1,3}}
+	{15,{1,3}},
 }
 
 --raw wave data
@@ -50,7 +50,7 @@ function start_round()
 	playing = true
 	spawning = true
 	spawn_index = 1
-	spawn_timer = waves_data[round][1]
+	spawn_timer = 0
 end
 
 function spawn_bloons()
@@ -298,6 +298,9 @@ function player_input()
 			
 			m,i = monkey_at(crp)
 			if m != false then
+				cls(0)
+				print(dump(m),7)
+				--stop()
 				menu_crsr = 0
 				in_menu = i
 				entered_menu = true
@@ -603,10 +606,45 @@ function new_mk(t)
 		vl=0,	--value
 		c=200,--cost
 		cmo=false, --camo
+		tgt=0, --target (0 first, 1 strong, 2 near, 3 last)
 		i=1, --sprite
 		trac=0, --transparency colour
 		r=2.5, --range
 		a=reg_attack, --attack func
+		proji=1, --current proj index
+		projs={base_proj},
+		adc=0, --attack delay counter
+		lar={0,-1}, --last attack dir
+		u1={}, --upgrade path 1
+		u2={}, --upgrade path 2
+		ui1=1, --upgrade index 1
+		ui2=1 --upgrade index 2
+	}
+	b = merge(base,t)
+	b.vl = b.c
+	return b
+end
+
+function merge(b,n)
+	local m = deep(b)
+	for k,v in pairs(n) do
+		if b[k] != nil then
+			if type(v) == "table" then
+				m[k] = merge(b[k],n[k])
+			else
+				m[k] = n[k]
+			end
+		else
+			m[k] = v
+		end
+	end
+	return m
+end	
+
+function def_monkeys()
+	base_proj = {
+		amt=1, --times to loop proj
+		ad=27, --attack delay
 		ps=4, --proj speed
 		pp=1, --proj pop power
 		phm=false, --proj homing
@@ -617,25 +655,10 @@ function new_mk(t)
 		pmom=1, --proj moab dmg multi
 		phfn=nil, --proj hit func
 		pshfn=nil, --post shoot func
-		l=false, --lead
-		cer=false, --ceramic
-		adc=0, --attack delay counter
-		ad=27, --attack delay
-		lar={0,-1}, --last attack dir
-		u1={}, --upgrade path 1
-		u2={}, --upgrade path 2
-		ui1=1, --upgrade index 1
-		ui2=1 --upgrade index 2
+		plead=false,	--lead
+		pcer=false, --ceramic
 	}
-	b = copy(base)
-	for k,v in pairs(t) do
-		b[k] = v
-	end
-	b.vl = b.c
-	return b
-end
 
-function def_monkeys()
 	dart = new_mk({
 		cs={
 			{{8,4}},
@@ -654,13 +677,13 @@ function def_monkeys()
 		},
 		u2={
 			{140,81,function (this)
-				this.pr += 1
-				this.pl += 5
+				this.projs[1].pr += 1
+				this.projs[1].pl += 5
 				this.ccs=max(2,this.ccs)
 			end},
 			{170,82,function (this)
-				this.pr += 1
-				this.pl += 5
+				this.projs[1].pr += 1
+				this.projs[1].pl += 5
 				this.cmo = true
 				this.ccs=max(3,this.ccs)
 			end}
@@ -673,7 +696,9 @@ function def_monkeys()
 			{{10,5},{8,7}},
 			{{10,7},{8,5}},
 			{{10,12},{8,5}},
-			{{10,14},{8,7}}
+			{{10,14},{8,7}},
+			{{10,8},{8,7}},
+			{{10,8},{8,5}},
 		},
 		u1={
 			{300,68,function(this)
@@ -684,25 +709,47 @@ function def_monkeys()
 			{300,69,function(this)
 				this.pr = 3
 				this.ccs=max(5,this.ccs)
+			end},
+			{850,70,function(this)
+				this.projs[1].amt = 2
+				this.ccs=6
 			end}
 		},
 		u2={
 			{250,84,function(this)
-				this.phm = true
-				this.pl += 10
+				this.projs[1].phm = true
+				this.projs[1].pl += 10
 				this.ccs=max(3,this.ccs)
 			end},
 			{350,85,function(this)
 				this.ccs=max(4,this.ccs)
-				this.phfn = ph_stun
+				this.projs[1].phfn = ph_stun
+			end},
+			{2750,86,function(this)
+				this.ccs=7
+				np = merge(base_proj,{
+					ad=0,
+					pstnc=100,
+					phfn=ph_flash_bmb
+				})
+				this.projs[1].ad = 18
+				this.projs[1].amt = 4
+				this.projs[2] = np
 			end}
 		},
 		i=3,
+		a=reg_attack,
 		c=500,
-		ad=18,
-		pr=2,
-		ps=6,
-		pdf=dp_shuriken,
+		projs={{ --first proj
+			amt=1,		--shuriken
+			ad=2,
+			ps=6,
+			pr=2,
+			pdf=dp_shuriken,
+			pstnc=15, --proj stun chance
+		},
+			{ad=16} --second proj
+		},							--only delay
 		r=2.9,
 		cmo=true
 	})
@@ -722,9 +769,11 @@ function def_monkeys()
 			end},
 			{300,78,function (this)
 				this.ccs=max(3,this.ccs)
+				this.projs[1].pfrag = true
 			end},
 			{800,79,function (this)
 				this.ccs=max(4,this.ccs)
+				this.projs[1].pfragbmb = true
 				if this.i != 4 then
 					this.ccs=6
 				end
@@ -732,35 +781,41 @@ function def_monkeys()
 		},
 		u2={
 			{400,93,function (this)
-				this.pvr = 2
-				this.pp = 2
-				this.pbr = 12
+				this.projs[1].pvr = 2
+				this.projs[1].pp = 2
+				this.projs[1].pbr = 12
+
 				this.ccs=max(2,this.ccs)
 			end},
 			{400,94,function (this)
-				this.pvr = 3
-				this.pp = 4
+				this.projs[1].pvr = 3
+				this.projs[1].pp = 4
 				this.r += 0.1
-				this.ad -= 0.4
-				this.ps += 3
+				this.projs[1].ad -= 0.4
+				this.projs[1].ps += 3
 				this.ccs=max(3,this.ccs)
 				this.ccs += 2
 				this.i = 20
 			end},
 			{900,95,function (this)
-				this.pvr = 4
-				this.pmom = 10
+				this.projs[1].pvr = 4
+				this.projs[1].pmom = 10
 				this.i = 36
 			end}
 		},
 		i=4,
 		c=650,
 		ad=42,
-		ps=2,
-		pbr=8,
-		pl=20,
-		phfn=ph_bomb,
-		pdf=dp_bomb,
+		projs={{
+			ps=2,
+			pbr=8,
+			pl=20,
+			phfn=ph_bomb,
+			pdf=dp_bomb,
+			pfrag=false,
+			pfragbmb=false,
+			pbig=false,
+		}},
 		r=3
 	})
 	apprentice = new_mk({
@@ -769,11 +824,13 @@ function def_monkeys()
 		},
 		i=5,
 		r=2.9,
-		pdf=dp_magic_bolt,
-		ps=2,
-		pr=2,
-		ad=33,
-		pl=20,
+		projs={{
+			pdf=dp_magic_bolt,
+			ps=2,
+			pr=2,
+			ad=33,
+			pl=20,
+		}},
 		trac=14
 	})
 	tack_shtr = new_mk({
@@ -806,7 +863,8 @@ function update_monkeys()
 		end
 		
 		if playing then
-			v.a(v)
+			b,dx,dy,d,k =	bloon_near(v.p,v.r*8+4,0)
+			v.a(v,b,dx,dy,d,k)
 			if v.pshfn != nil then
 				v.pshfn(v)				
 			end
@@ -831,7 +889,7 @@ function draw_base_monkey(ti,pos)
 end
 
 function spwn_monkey(pos,ti)
-	n = copy(monkey_types[ti])
+	n = deep(monkey_types[ti])
 	n.p = pos
 	add(monkeys,n)
 end
@@ -857,6 +915,7 @@ end
 --0 first
 --1 strong
 --2 near
+--3 last
 function bloon_near(pos,r,sort)
 	b = {nil,0,0,0,0,0}
 	for k,v in pairs(bloons) do
@@ -867,16 +926,17 @@ function bloon_near(pos,r,sort)
 		dx = (x-tx)
 		dy = (y-ty)
 		d = sqrt(dx^2+dy^2)
-		if sort == 0 then
-			s = v.s
-		elseif sort == 1 then
-			s = v.t
-		elseif sort == 2 then
-			s = -d
-		else
-			stop()
-		end
 		if d < r then
+			if sort == 0 then
+				s = v.s
+			elseif sort == 1 then
+				s = v.t
+			elseif sort == 2 then
+				s = -d
+			elseif sort == 3 then
+				s = -v.s
+			end
+			
 			if b[1] == nil or s > b[1] then
 				b={s,v,dx,dy,d,k}
 			end
@@ -885,24 +945,54 @@ function bloon_near(pos,r,sort)
 	return b[2],b[3],b[4],b[5],b[6]
 end
 
-function reg_attack(this)
-	b,dx,dy,d,k =	bloon_near(this.p,this.r*8+4,0)
+function reg_attack(this,b,dx,dy,d,k)
 	if b != 0 then
 		if this.adc <= 0 then
-			this.adc = this.ad
-			x = this.p[1]
-			y = this.p[2]
-			mx = dx/d
-			my = dy/d
-			this.lar = {mx,my}
-			spwn_proj(
-				{x,y},
-				{mx,my},
-				this
-			)
+			total = 0
+			for k,v in pairs(this.projs) do
+				if v.amt != nil then
+					total += v.amt
+				else
+					total += 1
+				end
+			end
+			
+			p = nil
+			cpi = 1
+			i = this.proji
+			while p == nil do
+				a = this.projs[cpi].amt or 1
+				if a >= i then
+					p = this.projs[cpi]
+					break
+				end
+				i -= a
+				cpi += 1
+			end
+			if p.ps != nil then
+				x = this.p[1]
+				y = this.p[2]
+				mx = dx/d
+				my = dy/d
+				this.lar = {mx,my}
+				spwn_proj(
+					{x,y},
+					{mx,my},
+					p
+				)
+			end
+			
+			--reset
+			this.adc = p.ad
+			this.proji += 1
+			if this.proji > total then
+				this.proji = 1
+			end
 		end
 	end
 end
+
+
 -->8
 --proj
 
@@ -1021,19 +1111,27 @@ function dp_magic_bolt(p)
 	circfill(p.p[1],p.p[2],1,14)
 end
 
+function ph_flash_bmb(this)
+	spwn_particle(this.p,dpr_explosion)
+	ph_stun(this)
+end
+
 function ph_stun(this)
 	rng = rnd(100)
-	if rng < 15 then
+	if rng < this.pstnc then
 		bls = bloons_near(this.p, 13)
 		for k,v in pairs(bls) do
-			confuse_bloon(v)
+			--dont confuse moabs
+			if bloon_types[v.t] == false then
+				confuse_bloon(v)
+			end
 		end
 	end
 end
 
 function ph_bomb(this)
 	part = dpr_explosion
-	if this.ui2 >= 2 then
+	if this.pvr != 1 then
 		part = dpr_big_explosion
 	end
 	spwn_particle(this.p,part)
@@ -1041,9 +1139,9 @@ function ph_bomb(this)
 	for k,v in pairs(bls) do
 		pop_bloon(indexof(bloons,v),1,1)
 	end
-	--if frag bomb upgrade
+	--if frag upgrade
 	--spawn 4 new bombs
-	if this.ui1 >= 3 then
+	if this.pfrag == true then
 		dirs = {
 			{0,1},
 			{0,-1},
@@ -1060,11 +1158,11 @@ function ph_bomb(this)
 				pdf=dp_bomb,
 				phfn=nil,
 				pvr=1,
-				ui1=1,
-				ui2=1,
+				pfrag=false,
+				pbig=false,
 				pbr=8
 			}
-			if this.ui1 >= 4 then
+			if this.pfragbmb == true then
 				powner.phfn = ph_bomb
 			end
 			spwn_proj(
@@ -1099,6 +1197,33 @@ function perf_o(x,y)
 	cpu = stat(1)
 	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
 	print("cpu:"..tostr(flr(cpu*100)).."%")
+end
+
+
+function dump(t,ind)
+	--stringify table
+	s = ""
+	if ind == nil then
+		s = s.."{\n"
+	end
+	local indl = ind or 1
+	local	indent = ""
+	for i=1,indl do
+		indent = indent.." "
+	end
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			s = s..indent..k..":{\n"..dump(v,indl+1)..indent.."}\n"
+		elseif type(v) == "string" then
+			s = s..indent..k..":\""..tostr(v).."\"\n"
+		else
+			s = s..indent..k..":"..tostr(v).."\n"
+		end
+	end
+	if ind == nil then
+		s = s.."}"
+	end
+	return s
 end
 
 function has_value (tab, val)
@@ -1148,6 +1273,18 @@ function copy(org)
 	t = {}
 	for k,v in pairs(org) do
   t[k] = v
+	end
+	return t
+end
+
+function deep(org)
+	local t = {}
+	for k,v in pairs(org) do
+		if type(v) == "table" then
+			t[k] = deep(v)
+		else
+	  t[k] = v			
+		end
 	end
 	return t
 end
@@ -1227,21 +1364,21 @@ __gfx__
 00888800005555000044440000dddd0000dddd00000000000000000000000000000000000000011cc11000000000077777700000000000003344443300000000
 000880000005500000044000000dd000000dd000000000000000000000000000000000000001111cc11110000000007777000000000000003333333300000000
 000000000000a0000000000000000000ffffff000000000000000000000000000000000000000000000000000000000000000000000000980099550000000598
-000000000055a66600000000000000000f4f4f4000000000000000000000000000000000000000000000000000000000000000000000055009a5550000805550
-0000a0000500a00022222222000000000ffffff00800008000000000000000000000000000000000000000000000000000000000006055550577759005980500
-0000aa0050000000299079920000000004444f4088850888000000000000000000000000000000000000000000000000000000000600055057777a9955500000
-0000aaa0500000b029900992000000000ffffff00055588800000000000000000000000000000000000000000000000000000000600000b09a77775505000080
-0000aa0050bb0bbb02999920000000000f44f440088508880000000000000000000000000000000000000000000000000000000060bb0bbb5a77aa5000000598
+000000000055a66600000000000000000f4f4f4000000000505000000000000000000000000000000000000000000000000000000000055009a5550000805550
+0000a0000500a00022222222000000000ffffff00800008005000000000000000000000000000000000000000000000000000000006055550577759005980500
+0000aa0050000000299079920000000004444f4088850888505050500000000000000000000000000000000000000000000000000600055057777a9955500000
+0000aaa0500000b029900992000000000ffffff00055588800000500000000000000000000000000000000000000000000000000600000b09a77775505000080
+0000aa0050bb0bbb02999920000000000f44f440088508880000505000000000000000000000000000000000000000000000000060bb0bbb5a77aa5000000598
 0000a0005bbbbbbb00222200000000000ffffff088800888000000000000000000000000000000000000000000000000000000006bbbbbbb05a7a99000005550
 00000000bbbbbbbb00000000000000000fffffff0800008000000000000000000000000000000000000000000000000000000000bbbbbbbb9955509000000500
-0066660000000000000000000000000000000a0000a0000000000000000000000000000000000000000000000000000000000000000898000000088800000aaa
-006006000000006000000020000000000005aaa0000000a00000000000000000000000000000000000000000000000000000000000558000000066680000aaaa
-0060060000066600000ee2000000000000555aaa0000baaa000000000000000000000000000000000000000000000000000000000500650000066668009aaaaa
-099999900066660000e22200000000000775aaaaa00bbba00000000000000000000000000000000000000000000000000000000050000650006686600999aaa0
-09955990006666000022220000000000777aaaaaaa0bbb000000000000000000000000000000000000000000000000000000000050000050cc686600aa9a9a00
-09959990a06660002022200000000000770aaaaaa00bbb000000000000000000000000000000000000000000000000000000000050000050c1866000cca99900
-099999900600000005000000000000007000aaa0000bbb0000000000000000000000000000000000000000000000000000000000050005001c1c0000caca9000
-0000000000a00000002000000000000070000a000000b0000000000000000000000000000000000000000000000000000000000000555000c1cc0000ccca0000
+0066660000000000000000000000000000000a0000a0000000089800000000000000000000000000000000000000000000000000000898000000088800000aaa
+006006000000006000000020000000000005aaa0000000a00055800000000000000000000000000000000000000000000000000000558000000066680000aaaa
+0060060000066600000ee2000000000000555aaa0000baaa050005000000000000000000000000000000000000000000000000000500650000066668009aaaaa
+099999900066660000e22200000000000775aaaaa00bbba050a0a05000000000000000000000000000000000000000000000000050000650006686600999aaa0
+09955990006666000022220000000000777aaaaaaa0bbb00500a005000000000000000000000000000000000000000000000000050000050cc686600aa9a9a00
+09959990a06660002022200000000000770aaaaaa00bbb0050a0a05000000000000000000000000000000000000000000000000050000050c1866000cca99900
+099999900600000005000000000000007000aaa0000bbb0005000500000000000000000000000000000000000000000000000000050005001c1c0000caca9000
+0000000000a00000002000000000000070000a000000b0000055500000000000000000000000000000000000000000000000000000555000c1cc0000ccca0000
 0000000000050000005000059008800900000000000000000000000000000000000000000000000000000000000000000000000000e00e00000eee0001111110
 000000000050000055000550098008900000000000000000000000000000000000000000000000000000000000000000000000000000000000ee000055555555
 000000005500000005000050080880800000000000000000000000000000000000000000000000000000000000000000000000000e00000000e0000000111110
