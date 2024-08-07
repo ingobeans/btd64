@@ -595,13 +595,10 @@ end
 --monkeys data
 
 monkey_types = {}
-current_i = 0
 
 function new_mk(t)
-	current_i += 1
 	base = {
 		p={0,0},	--pos
-		ti=current_i, --type index
 		cs={{}}, --color states
 		ccs=1,	--current color state
 		vl=0,	--value
@@ -623,6 +620,8 @@ function new_mk(t)
 	}
 	b = merge(base,t)
 	b.vl = b.c
+	b.ti = #monkey_types+1
+	add(monkey_types, b)
 	return b
 end
 
@@ -689,6 +688,12 @@ function def_monkeys()
 				this.ccs=max(3,this.ccs)
 			end}
 		}
+	})
+	
+	tack_shtr = new_mk({
+		i=2,
+		r=1.4,
+		trac=0
 	})
 	
 	ninja = new_mk({
@@ -833,12 +838,6 @@ function def_monkeys()
 			pl=20,
 		}},
 	})
-	tack_shtr = new_mk({
-		i=2,
-		r=1.4,
-		trac=0
-	})
-	monkey_types = {dart,ninja,bomb_shtr,apprentice,tack_shtr}
 end
 -->8
 --monkeys
