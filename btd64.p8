@@ -9,6 +9,7 @@ gnd = 28
 gnd_clr = 3
 
 waves_data = {
+	{10,{30,2}},
 	{25,{20,1}},
 	{15,{40,1}},
 	{15,{30,1},{15,2}},
@@ -1063,10 +1064,13 @@ function update_proj()
 					--check if can home
 					if v.phm == true then
 						b,dx,dy,d,bi = bloon_near(v.p,20,0)
-						if b != 0 then
-							v.mv = {dx/d,dy/d}
-							repeat_move = true
-							break
+						--dont home if very close
+						if d > 3 then
+							if b != 0 then
+								v.mv = {dx/d,dy/d}
+								repeat_move = true
+								break
+							end
 						end
 					end
 					end
