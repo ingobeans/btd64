@@ -937,7 +937,7 @@ function update_monkeys()
 		end
 		
 		if playing then
-			b,dx,dy,d,k =	bloon_near(v.p,v.r*8+4,0)
+			b,dx,dy,d,k =	bloon_near(v.p,v.r*8,0)
 			v.a(v,b,dx,dy,d,k)
 			if v.pshfn != nil then
 				v.pshfn(v)				
@@ -1049,7 +1049,7 @@ function rof_attack(this,b,dx,dy,d,k)
 	if b != 0 and this.adc <= 0 then
 		this.adc = this.projs[1].ad
 		spwn_particle(this.p, dpr_rof)
-		bl = bloons_near(this.p, this.r*8+4)
+		bl = bloons_near(this.p, this.r*8)
 		for k,v in pairs(bl) do
 			bi = indexof(bloons, v)
 			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom)
@@ -1481,10 +1481,13 @@ function draw_particles()
 end
 
 function dpr_rof(this)
-	if this[3] > 15 then
+	if this[3] > 7 then
 		return true
 	end
-	circ(this[1][1], this[1][2], this[3], 9)
+	
+	for i=1,4 do
+		circ(this[1][1], this[1][2], 6+this[3]*1.7-i, 9)
+	end
 end
 
 function dpr_big_explosion(this)
