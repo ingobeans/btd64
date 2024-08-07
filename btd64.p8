@@ -1041,72 +1041,74 @@ end
 function update_proj()
 	for k,v in pairs(proj) do
 		v.plc += gspd
-		if v.plc >= v.pl then
-			del(proj,v)
-		else			
+		removed = false
 		
-			--to not hit same bloon twice
-			hit_bloons = {}
+		--to not hit same bloon twice
+		hit_bloons = {}
+		
+		--loop to repeat in case
+		--move direction changes
+		repeat_move = true
+		while repeat_move do
+			repeat_move = false
+			tmx = v.mv[1]*v.ps*gspd
+			tmy = v.mv[2]*v.ps*gspd
 			
-			--loop to repeat in case
-			--move direction changes
-			repeat_move = true
-			while repeat_move do
-				repeat_move = false
-				tmx = v.mv[1]*v.ps*gspd
-				tmy = v.mv[2]*v.ps*gspd
+			--split the movement of proj
+			--to chunks smaller than 5 px
+			--for a consistent collision
+			--detection
+			max_gap = 7
+			ttmx = {}
+			ttmy = {}
+			
+			mxs = max(ceil(abs(tmx)/max_gap),ceil(abs(tmy)/max_gap))
+   for j=1,mxs do
+    add(ttmx, tmx/mxs)
+    add(ttmy, tmy/mxs)
+			end
+			
+			for k,csmx in pairs(ttmx) do
+				csmy = ttmy[k]
+				v.p[1] += csmx
+				v.p[2] += csmy
 				
-				--split the movement of proj
-				--to chunks smaller than 5 px
-				--for a consistent collision
-				--detection
-				max_gap = 7
-				ttmx = {}
-				ttmy = {}
-				
-				mxs = max(ceil(abs(tmx)/max_gap),ceil(abs(tmy)/max_gap))
-	   for j=1,mxs do
-	    add(ttmx, tmx/mxs)
-	    add(ttmy, tmy/mxs)
-				end
-				
-				for k,csmx in pairs(ttmx) do
-					csmy = ttmy[k]
-					v.p[1] += csmx
-					v.p[2] += csmy
+				b,dx,dy,d,bi = bloon_near(v.p,4,0)
+				if b != 0 and not has_value(hit_bloons, b) then
+					cash += 1
+					pop_bloon(bi, v.pp, v.pmom)
+					add(hit_bloons, b)
+					if v.phfn != nil then
+						v.phfn(v)
+					end
 					
-					b,dx,dy,d,bi = bloon_near(v.p,4,0)
-					if b != 0 and not has_value(hit_bloons, b) then
-						cash += 1
-						pop_bloon(bi, v.pp, v.pmom)
-						add(hit_bloons, b)
-						if v.phfn != nil then
-							v.phfn(v)
-						end
-						
-						v.prc += 1
-						if v.prc == v.pr then
-							del(proj,v)
+					v.prc += 1
+					if v.prc == v.pr then
+						removed = true
+						del(proj,v)
+						break
+					end
+					
+				--check if can home
+				if v.phm == true then
+					b,dx,dy,d,bi = bloon_near(v.p,20,0)
+					--dont home if very close
+					if d > 3 then
+						if b != 0 then
+							v.mv = {dx/d,dy/d}
+							repeat_move = true
 							break
 						end
-						
-					--check if can home
-					if v.phm == true then
-						b,dx,dy,d,bi = bloon_near(v.p,20,0)
-						--dont home if very close
-						if d > 3 then
-							if b != 0 then
-								v.mv = {dx/d,dy/d}
-								repeat_move = true
-								break
-							end
-						end
-					end
 					end
 				end
+				end
 			end
-			v.pdf(v)			
 		end
+		if v.plc >= v.pl and 
+					removed == false then
+			del(proj,v)
+		end
+		v.pdf(v)
 	end
 end
 
