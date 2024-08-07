@@ -693,7 +693,12 @@ function def_monkeys()
 	tack_shtr = new_mk({
 		i=2,
 		r=1.4,
-		trac=0
+		trac=0,
+		projs={{
+			pl=6,
+			ad=18
+		}},
+		a=tack_attack
 	})
 	
 	ninja = new_mk({
@@ -943,6 +948,31 @@ function bloon_near(pos,r,sort)
 		end
 	end
 	return b[2],b[3],b[4],b[5],b[6]
+end
+
+function tack_attack(this,b,dx,dy,d,k)
+	if b != 0 and this.adc <= 0 then
+		dirs = {
+			{0,1},
+			{0,-1},
+			{1,0},
+			{-1,0},
+			{0.7,0.7},
+			{0.7,-0.7},
+			{-0.7,0.7},
+			{-0.7,-0.7}
+		}
+		for k,v in pairs(dirs) do
+			p = copy(this.projs[1])
+			spwn_proj(
+				{this.p[1],this.p[2]},
+				{v[1],v[2]},
+				p
+			)
+		end
+		--reset
+		this.adc = this.projs[1].ad
+	end
 end
 
 function reg_attack(this,b,dx,dy,d,k)
