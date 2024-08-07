@@ -1126,7 +1126,9 @@ function ph_stun(this)
 		bls = bloons_near(this.p, 13)
 		for k,v in pairs(bls) do
 			--dont confuse moabs
-			if bloon_types[v.t] == false then
+			--or already confused bloons
+			if bloon_types[v.t][7] == false and 
+						v.cnf == false then
 				confuse_bloon(v)
 			end
 		end
@@ -1189,6 +1191,14 @@ function dir_to(sp,tp)
 	dy = y-ty
 	d = sqrt(dx^2+dy^2)
 	return {dx/d, dy/d}
+end
+
+function log(s)
+	cls(0)
+	cursor(0,0)
+	color(7)
+	print(s)
+	stop()
 end
 
 function perf_o(x,y)
