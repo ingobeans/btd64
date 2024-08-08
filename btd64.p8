@@ -480,7 +480,7 @@ function menu_input()
 						end
 						cash -= u[1]
 						m.vl += u[1]
-						u[3](m)
+						u[4](m)
 					end
 				end
 			end
@@ -550,6 +550,8 @@ function draw_menu()
 				rect(128-w,k*10,127,10+k*10,15)
 				spr(v[2],130-w+3,k*10+2)
 				print("$"..v[1],128-w+12+3,k*10+2,15)
+				rectborder(0,k*10,128-w,k*10+10,4,15)
+				print(v[3],0+2,k*10+2,15)
 			end
 		end
 		
@@ -696,15 +698,16 @@ function def_monkeys()
 			{}
 		},
 		u1={
-			{90,65,function (this)
+			{90,65,"long range",function (this)
 				this.r = 2.9
 				this.ccs=max(2,this.ccs)
 			end},
-			{120,66,function (this)
+			{120,66,"longer range",function (this)
 				this.r = 3.4
 				this.ccs=max(3,this.ccs)
+				this.camo = true
 			end},
-			{500,67,function (this)
+			{500,67,"spikeball",function (this)
 				this.projs[1].pr += 17
 				this.projs[1].ad = 46
 				this.projs[1].ps = 2
@@ -713,18 +716,18 @@ function def_monkeys()
 			end}
 		},
 		u2={
-			{140,81,function (this)
+			{140,81,"sharp darts",function (this)
 				this.projs[1].pr += 1
 				this.projs[1].pl += 5
 				this.ccs=max(2,this.ccs)
 			end},
-			{170,82,function (this)
+			{170,82,"sharper darts",function (this)
 				this.projs[1].pr += 2
 				this.projs[1].pl += 5
 				this.cmo = true
 				this.ccs=max(3,this.ccs)
 			end},
-			{330,83,function (this)
+			{330,83,"triple darts",function (this)
 				this.ccs = 3
 				this.i = 17
 				this.a = triple_attack
@@ -734,27 +737,27 @@ function def_monkeys()
 	
 	tack_shtr = new_mk({
 		u1={
-			{210,97,function (this)
+			{210,97,"fast shoot",function (this)
 				this.projs[1].ad -= 2
 			end},
-			{300,98,function (this)
+			{300,98,"faster shoot",function (this)
 				this.projs[1].ad -= 2
 				this.i = max(18, this.i)
 			end},
-			{2500,99,function (this)
+			{2500,99,"ring of fire",function (this)
 				this.i = 33
 				this.a = rof_attack
 			end},
 		},
 		u2={
-			{100,113,function (this)
+			{100,113,"long range",function (this)
 				this.r = 1.8
 			end},
-			{225,114,function (this)
+			{225,114,"longer range",function (this)
 				this.r = 2.2
 				this.i = max(18, this.i)
 			end},
-			{680,115,function (this)
+			{680,115,"blade shooter",function (this)
 				this.i = 34
 				this.projs[1].pdf = dp_blade
 				this.projs[1].pr += 7
@@ -782,31 +785,31 @@ function def_monkeys()
 			{{10,8},{8,5}},
 		},
 		u1={
-			{300,68,function(this)
+			{300,68,"large range,faster",function(this)
 				this.r = 3.2
 				this.ad = 12
 				this.ccs=max(2,this.ccs)
 			end},
-			{300,69,function(this)
+			{300,69,"sharp shurikens",function(this)
 				this.pr = 3
 				this.ccs=max(5,this.ccs)
 			end},
-			{850,70,function(this)
+			{850,70,"double shot",function(this)
 				this.projs[1].amt = 2
 				this.ccs=6
 			end}
 		},
 		u2={
-			{250,84,function(this)
+			{250,84,"seeking shuriken",function(this)
 				this.projs[1].phm = true
 				this.projs[1].pl += 10
 				this.ccs=max(3,this.ccs)
 			end},
-			{350,85,function(this)
+			{350,85,"distraction",function(this)
 				this.ccs=max(4,this.ccs)
 				this.projs[1].phfn = ph_stun
 			end},
-			{2750,86,function(this)
+			{2750,86,"flash bomb",function(this)
 				this.ccs=7
 				np = merge(base_proj,{
 					ad=0,
@@ -844,15 +847,15 @@ function def_monkeys()
 			{{5,3},{6,11},{12,6}}
 		},
 		u1={
-			{200,77,function (this)
+			{200,77,"large range",function (this)
 				this.r += 0.3
 				this.ccs=max(2,this.ccs)
 			end},
-			{300,78,function (this)
+			{300,78,"frag bombs",function (this)
 				this.ccs=max(3,this.ccs)
 				this.projs[1].pfrag = true
 			end},
-			{800,79,function (this)
+			{800,79,"cluster bombs",function (this)
 				this.ccs=max(4,this.ccs)
 				this.projs[1].pfragbmb = true
 				if this.i != 4 then
@@ -861,14 +864,14 @@ function def_monkeys()
 			end}
 		},
 		u2={
-			{400,93,function (this)
+			{400,93,"bigger bombs",function (this)
 				this.projs[1].pvr = 2
 				this.projs[1].pp = 2
 				this.projs[1].pbr = 12
 
 				this.ccs=max(2,this.ccs)
 			end},
-			{400,94,function (this)
+			{400,94,"missile launcher",function (this)
 				this.projs[1].pvr = 3
 				this.projs[1].pp = 4
 				this.r += 0.1
@@ -878,7 +881,7 @@ function def_monkeys()
 				this.ccs += 2
 				this.i = 20
 			end},
-			{900,95,function (this)
+			{900,95,"moab mauler",function (this)
 				this.projs[1].pvr = 4
 				this.projs[1].pmom = 10
 				this.i = 36
@@ -904,10 +907,10 @@ function def_monkeys()
 			{}
 		},
 		u1={
-			{300,109, function (this)
+			{300,109,"intense magic",function (this)
 				this.projs[1].pr += 5
 			end},
-			{1200,110, function (this)
+			{1200,110,"lightning bolt",function (this)
 				this.i = max(21,this.i)
 				add(this.projs, merge(base_proj, {
 					ad=0,
@@ -915,12 +918,12 @@ function def_monkeys()
 					phfn=ph_lightning
 				}),1)
 			end},
-			{2000,111, function (this)
+			{2000,111,"summon whirlwind",function (this)
 				this.i = 22
 			end},
 		},
 		u2={
-			{300,125, function (this)
+			{300,125,"fireball",function (this)
 				this.projs[1].amt = 2
 				add(this.projs, merge(base_proj, {
 					ad=5,
@@ -929,11 +932,11 @@ function def_monkeys()
 					lead=true
 				}))
 			end},
-			{300,126, function (this)
+			{300,126,"camo sense",function (this)
 				this.camo = true
 				this.i = max(21,this.i)
 			end},
-			{4200,127, function (this)
+			{4200,127,"dragon's breath",function (this)
 				this.i = 23
 			end},
 		},
