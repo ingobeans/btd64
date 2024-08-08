@@ -221,7 +221,6 @@ function draw_bloons()
 		bmxh = bt[6]
 		
 		if bmxh != 1 then
-			print(v.h,v.p[1]+16,v.p[2],0)
 			if v.h < bmxh / 2 then
 				img += bs
 			end
@@ -1002,7 +1001,8 @@ function def_monkeys()
 					phfn = ph_firebreath,
 					amt=32,
 					ps=1,
-					pl=30
+					pl=30,
+					pmom=0.7,
 				})
 			end},
 		},
@@ -1019,26 +1019,42 @@ function def_monkeys()
 	super = new_mk({
 		u1={
 			{3500,100,"laser blasts",function (this)
-				--i -> 43 (if not > 43)
+				this.i = max(43, this.i)
+				this.projs[1].pr += 1
+				this.projs[1].pdf = dp_laser
+				this.a = double_attack
 			end},
 			{5000,101,"plasma blasts",function (this)
-				--i -> 59 (if not > 59)
+				this.i = max(59, this.i)
+				this.projs[1].pr += 1
+				this.projs[1].pdf = dp_plasma
+				this.projs[1].ad = 1
+				this.a = reg_attack
 			end},
 			{16500,102,"sun god",function (this)
-				--i -> 60
+				this.i = 60
+				this.a = triple_attack
+				this.projs[1].pr = 15
+				this.projs[1].pdf = dp_sunbeam
 			end},
 		},
 		u2={
 			{1000,116,"super range",function (this)
-			
+				this.r += 1
 			end},
 			{1500,117,"epic range",function (this)
-				--i -> 27 (if not > 11)
+				this.i = max(27, this.i)
+				this.r += 1
 			end},
 			{9000,118,"robo monkey",function (this)
-				--i -> 61
+				this.i = 61
+				this.a = double_attack
 			end},
 		},
+		projs={{
+			ad=1.7,
+			pl=30
+		}},
 		i=11,
 		c=3500,
 		r=2.9,
@@ -1149,6 +1165,34 @@ function bloon_near(pos,r,sort)
 		end
 	end
 	return b[2],b[3],b[4],b[5],b[6]
+end
+
+function double_attack(this,b,dx,dy,d,k)
+	if b != 0 and this.adc <= 0 then
+		this.adc = this.projs[1].ad
+		angle_offset = 90/370
+		poa = 2
+		tx = dx/d
+		ty =	dy/d
+		ta = atan2(ty,tx)
+		
+		nox = sin(ta+angle_offset)
+		noy = cos(ta+angle_offset)
+		pos = {
+			{this.p[1]+nox*poa,this.p[2]+noy*poa},
+			{this.p[1]-nox*poa,this.p[2]-noy*poa}
+		}
+		this.lar = {tx,ty}
+		
+		for k,v in pairs(pos) do
+			p = copy(this.projs[1])
+			spwn_proj(
+				v,
+				{tx,ty},
+				p
+			)
+		end
+	end
 end
 
 function triple_attack(this,b,dx,dy,d,k)
@@ -1392,6 +1436,18 @@ function dp_bomb(p)
 		line(sx,sy,ex,ey,cb)
 		pset(ex,ey,ct)
 	end
+end
+
+function dp_laser(p)
+	line(p.p[1],p.p[2],p.p[1]+p.mv[1]*2,p.p[2]+p.mv[2]*2,8)
+end
+
+function dp_plasma(p)
+	circfill(p.p[1],p.p[2],2,14)
+end
+
+function dp_sunbeam(p)
+	circfill(p.p[1],p.p[2],2,10)
 end
 
 function dp_shuriken(p)
@@ -1758,13 +1814,13 @@ e4444eeeeeeeeeeeccceccec00000000ee6666eeee0550eeee1cc1eeee9889ee0000000000000000
 000000009c8888cc5566665c00000000ea5aa5ae11c7ccc7cccccc7711cddcc7ccdccc760000000000000000d8cccc8d0000000033ffffffbbbbbbbbffffff33
 00000000ccc9cc9cccc5c55c00000000ee6666eeccc7cc77cccccc77cccdcc77ccddcc770000000000000000dd8888dd0000000033333333bbbbbbbb33333333
 00888800006665000044440000dddd0000dddd00ccc7cc77cccccc77ccc7cc77cccdcc770000000000000000ddddddddddddddddddddddddbbbbbbbb00000000
-0888888006655550094444900dddddd00dddddd011c7ccc7cccccc7711c7ccc7ccddcc770000000000000000ddddddddddddddddddddddddbbbbbbbb00000000
-0888888006555550049999400dddddd00dddddd01117ccc7ccccc7701117cdc7ccccc7600000000000000000ddeaaeddddeaaeddddeaaeddbbbbbbbb00000000
-0888888006555550044444400dddddd00dddddd011007cc7cccc770011007dd7cccc76000000000000000000dcaeeacddaaeeaaddcaeeacdbbbbbbbb00000000
-0888888006555550094444900dddddd00dddddd0110000c7cccc0000010000d6dccc00000000000000000000dccccccddaaaaaaddccccccd3bbbbbb300000000
-0888888005555550049999400dddddd00dddddd0000000000000000000000000000000000000000000000000dccccccddaaaaaaddccccccd3344443300000000
-00888800005555000044440000dddd0000dddd00000000000000000000000000000000000000000000000000decccceddeaaaaeddecccced3344443300000000
-000880000005500000044000000dd000000dd000000000000000000000000000000000000000000000000000ddeeeeddddeeeeddddeeeedd3333333300000000
+0888888006655550094444900dddddd00dddddd011c7ccc7cccccc7711c7ccc7ccddcc770000000000000000dddddddddddddddd2dddddd2bbbbbbbb00000000
+0888888006555550049999400dddddd00dddddd01117ccc7ccccc7701117cdc7ccccc7600000000000000000ddeaaedddd7997dd5d4444d5bbbbbbbb00000000
+0888888006555550044444400dddddd00dddddd011007cc7cccc770011007dd7cccc76000000000000000000dcaeeacdd99aa99d50000005bbbbbbbb00000000
+0888888006555550094444900dddddd00dddddd0110000c7cccc0000010000d6dccc00000000000000000000dccccccddaaaaaad555555553bbbbbb300000000
+0888888005555550049999400dddddd00dddddd0000000000000000000000000000000000000000000000000dccccccdd9a99a9d555555553344443300000000
+00888800005555000044440000dddd0000dddd00000000000000000000000000000000000000000000000000decccced99a99a99d555555d3344443300000000
+000880000005500000044000000dd000000dd000000000000000000000000000000000000000000000000000ddeeeedddda99adddd5555dd3333333300000000
 000000000000a0000000000000000000ffffff000000000000000000000000000000000000000000000000000000000000000000000000980099550000000598
 000000000055a66600000000050505000f4f4f4000000000505000000000000000000000000000000000000000000000000000000000055009a5550000805550
 0000a0000500a00022222222005660000ffffff00800008005000000000000000000000000000000000000000000000000000000006055550577759005980500
