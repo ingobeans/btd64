@@ -39,8 +39,8 @@ end
 round = 0
 playing = false
 spawning = true
-spawn_index = 0
-spawn_timer = 0
+spwn_index = 0
+spwn_timer = 0
 
 slowc = 0
 slowdown = 0
@@ -52,21 +52,21 @@ function start_round()
 	round += 1
 	playing = true
 	spawning = true
-	spawn_index = 1
-	spawn_timer = 0
+	spwn_index = 1
+	spwn_timer = 0
 end
 
-function spawn_bloons()
+function spwn_bloons()
 	if playing and spawning then
-		spawn_timer -= gspd
-		if spawn_timer <= 0 then
-			spawn_timer = waves_data[round][1]
-			t = waves[round][spawn_index]
+		spwn_timer -= gspd
+		if spwn_timer <= 0 then
+			spwn_timer = waves_data[round][1]
+			t = waves[round][spwn_index]
 			sx = map_pts[1][1]*8
 			sy = map_pts[1][2]*8
-			spawn_bloon({sx,sy},t)
-			spawn_index += 1
-			if spawn_index > #waves[round] then
+			spwn_bloon({sx,sy},t)
+			spwn_index += 1
+			if spwn_index > #waves[round] then
 				spawning = false
 			end
 		end
@@ -94,7 +94,7 @@ function main()
 	draw_tooltip()
 	draw_particles()
 	empty_bloons_buffer()
-	spawn_bloons()
+	spwn_bloons()
 	--perf_o(0,12)
 end
 
@@ -126,7 +126,7 @@ bloons = {}
 bloons_buffer = {}
 function empty_bloons_buffer()
 	for k,v in pairs(bloons_buffer) do
-		spawn_bloon(v[1],v[2],v[3],v[4],v[5],v[6],v[7])
+		spwn_bloon(v[1],v[2],v[3],v[4],v[5],v[6],v[7])
 	end
 	bloons_buffer = {}
 end
@@ -184,7 +184,7 @@ function bloons_at(pos)
 	return b
 end
 
-function spawn_bloon(pos,t,id,pt,s,ptss,cnf)
+function spwn_bloon(pos,t,id,pt,s,ptss,cnf)
 	id = id or #bloons + 1
 	pt = pt or 1
 	ptss = ptss or {0}
