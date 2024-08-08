@@ -309,7 +309,7 @@ end
 -->8
 --player
 
-cash = 6500
+cash = 650 *10*5
 lives = 100
 crsr = {8,8}
 
@@ -1001,6 +1001,8 @@ function def_monkeys()
 					lead = true,
 					phfn = ph_firebreath,
 					amt=32,
+					ps=1,
+					pl=30
 				})
 			end},
 		},
