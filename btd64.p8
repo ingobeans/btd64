@@ -329,10 +329,8 @@ function player_input()
 			
 			m,i = monkey_at(crp)
 			if m != false then
-				cls(0)
-				print(dump(m),7)
-				--stop()
 				menu_crsr = 0
+				extra_info = false
 				in_menu = i
 				entered_menu = true
 			end
@@ -386,6 +384,9 @@ menu_crsr = 0
 placing = -1
 valid = true
 
+--in upgrade menu
+extra_info = false
+
 function rectborder(x1,y1,x2,y2,clr1,clr2)
 	rectfill(x1,y1,x2,y2,clr1)
 	rect(x1,y1,x2,y2,clr2)
@@ -394,13 +395,22 @@ end
 function draw_tooltip()
 	rectfill(0,120,127,127,0)
 	
-	o = "open menu"
+	o = "menu"
 	x = false
+	l = false
+	r = false
 	if in_menu != -1 then
-		o = "close menu"
+		o = "exit"
 		x = "select"
+		if in_menu != 0 then
+			if extra_info then
+				r = "show less"
+			else
+				l = "show more"
+			end
+		end
 	elseif placing != -1 then
-		o = "cancel"
+		o = "exit"
 		x = "confirm"
 	else
 		if monkey_at({crsr[1]*8,crsr[2]*8}) != false then
@@ -410,7 +420,13 @@ function draw_tooltip()
 	
 	print("🅾️ "..o,0,121,7)
 	if x != false then
-		print("❎ "..x,64,121,7)
+		print("❎ "..x,8*4,121,7)
+	end
+	if l != false then
+		print("⬅️ "..l,8*4+10*4,121,7)
+	end
+	if r != false then
+		print("➡️ "..r,8*4+10*4,121,7)
 	end
 end
 
@@ -484,6 +500,10 @@ function menu_input()
 					end
 				end
 			end
+		elseif btnp(⬅️) then
+			extra_info = true
+		elseif btnp(➡️) then
+			extra_info = false
 		end
 	end
 end
@@ -542,16 +562,26 @@ function draw_menu()
 				rect(128-w,k*10,127,10+k*10,15)
 				spr(80,130-w+3,k*10+2)
 				print("locked",128-w+12+3,k*10+2,15)
+				if extra_info then
+					rectborder(0,k*10,128-w,k*10+10,4,15)
+					print("path is locked",0+2,k*10+2,15)
+				end
 			elseif v == 1 then
 				rect(128-w,k*10,127,10+k*10,15)
 				print("max upg.",128-w+2+3,k*10+2,15)
+				if extra_info then
+					rectborder(0,k*10,128-w,k*10+10,4,15)
+					print("all upgrades",0+2,k*10+2,15)
+				end
 			else
 				rectfill(128-w+3,k*10,128-w+9+3,10+k*10,0)				
 				rect(128-w,k*10,127,10+k*10,15)
 				spr(v[2],130-w+3,k*10+2)
 				print("$"..v[1],128-w+12+3,k*10+2,15)
-				rectborder(0,k*10,128-w,k*10+10,4,15)
-				print(v[3],0+2,k*10+2,15)
+				if extra_info then
+					rectborder(0,k*10,128-w,k*10+10,4,15)
+					print(v[3],0+2,k*10+2,15)
+				end
 			end
 		end
 		
