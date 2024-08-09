@@ -1029,7 +1029,9 @@ function def_monkeys()
 				this.projs[1].pr += 1
 				this.projs[1].pdf = dp_plasma
 				this.projs[1].ad = 1
-				this.a = reg_attack
+				if this.ui2 < 4 then
+					this.a = reg_attack
+				end
 			end},
 			{16500,102,"sun god",function (this)
 				this.i = 60
@@ -1049,6 +1051,7 @@ function def_monkeys()
 			{9000,118,"robo monkey",function (this)
 				this.i = 61
 				this.a = double_attack
+				this.projs[1].pr += 2
 			end},
 		},
 		projs={{
@@ -1443,7 +1446,8 @@ function dp_laser(p)
 end
 
 function dp_plasma(p)
-	circfill(p.p[1],p.p[2],2,14)
+	circfill(p.p[1],p.p[2],2,7)
+	circ(p.p[1],p.p[2],2,14)
 end
 
 function dp_sunbeam(p)
