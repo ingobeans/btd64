@@ -233,6 +233,7 @@ function draw_bloons()
 		--if moab, calculate angle
 		--of move, and draw rotated
 		if bt[7] == true then
+			print(v.h,v.p[1]+12,v.p[2],0)
 			--normalise move dir
 			md = sqrt(abs(v.lmd[1])^2+abs(v.lmd[2])^2)
 			
@@ -817,7 +818,8 @@ function def_monkeys()
 		cs={
 			{{12,11}},
 			{},
-			{{12,2}}
+			{{12,2}},
+			{{12,0}},
 		},
 		u1={
 			{350,71,"pop 4 layers, lead", function (this)
@@ -826,11 +828,11 @@ function def_monkeys()
 				this.projs[1].pp += 3
 			end},
 			{2200,72,"pop 7 layers!", function (this)
-				this.ccs = max(2,this.ccs)
+				this.ccs = max(3,this.ccs)
 				this.projs[1].pp += 4
 			end},
 			{4000,73,"18 dmg (full cer)", function (this)
-				this.ccs = 3
+				this.ccs = 4
 				this.projs[1].pp += 11
 			end},
 		},
@@ -853,6 +855,7 @@ function def_monkeys()
 			pp=2,
 			ad=66,
 			plead=false,
+			pmom=5,
 		}},
 		a=sniper_attack,
 		i=8,
@@ -1221,7 +1224,7 @@ function sniper_attack(this)
 		this.adc = this.projs[1].ad
 			--get bloon w. inf range
 		b,dx,dy,d,k = bloon_near({64,64},128,this.tg)
-		pop_bloon(b,this.projs[1].pp,this.projs[1].pmom)
+		pop_bloon(k,this.projs[1].pp,this.projs[1].pmom)
 		this.lar = {dx/d,dy/d}
 		spwn_particle(this.p,dpr_sniper_fire,this.lar)
 	end	
