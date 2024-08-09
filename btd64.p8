@@ -825,11 +825,11 @@ function def_monkeys()
 			{350,71,"pop 4 layers, lead", function (this)
 				this.ccs = max(2,this.ccs)
 				this.projs[1].plead = true
-				this.projs[1].pp += 3
+				this.projs[1].pp += 2
 			end},
 			{2200,72,"pop 7 layers!", function (this)
 				this.ccs = max(3,this.ccs)
-				this.projs[1].pp += 4
+				this.projs[1].pp += 3
 			end},
 			{4000,73,"18 dmg (full cer)", function (this)
 				this.ccs = 4
