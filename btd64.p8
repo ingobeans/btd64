@@ -706,7 +706,6 @@ function new_mk(t)
 		i=1, --sprite
 		trac=14, --transparency colour
 		r=2.5, --range
-		a=reg_attack, --attack func
 		proji=1, --current proj index
 		projs={base_proj},
 		adc=0, --attack delay counter
@@ -742,6 +741,7 @@ end
 
 function def_monkeys()
 	base_proj = {
+		a = reg_attack, --atack func
 		amt=1, --times to loop proj
 		ad=27, --attack delay
 		ps=4, --proj speed
@@ -797,7 +797,8 @@ function def_monkeys()
 			{330,83,"triple darts",function (this)
 				this.ccs = 3
 				this.i = 17
-				this.a = triple_attack
+				this.projs[1].paof = 15
+				this.projs[1].a = triple_attack
 			end}
 		}
 	})
@@ -813,7 +814,7 @@ function def_monkeys()
 			end},
 			{2500,99,"ring of fire",function (this)
 				this.i = 33
-				this.a = rof_attack
+				this.projs[1].a = rof_attack
 			end},
 		},
 		u2={
@@ -836,9 +837,9 @@ function def_monkeys()
 		trac=12,
 		projs={{
 			pl=6,
-			ad=18
+			ad=18,
+			a=tack_attack
 		}},
-		a=tack_attack
 	})
 	sniper = new_mk({
 		cs={
@@ -865,6 +866,7 @@ function def_monkeys()
 		u2={
 			{400,87,"faster firing", function (this)
 				this.ccs = max(2,this.ccs)
+				this.projs[1].ad /= 1.4
 			end},
 			{300,88,"camo goggles", function (this)
 				this.camo = true
@@ -882,8 +884,8 @@ function def_monkeys()
 			ad=66,
 			plead=false,
 			pmom=5,
+			a=sniper_attack,
 		}},
-		a=sniper_attack,
 		i=8,
 		c=350,
 		r=1.4,
@@ -936,17 +938,17 @@ function def_monkeys()
 			end}
 		},
 		i=3,
-		a=reg_attack,
 		c=500,
 		projs={{ --first proj
 			amt=1,		--shuriken
 			ad=2,
 			ps=6,
 			pr=2,
+			a=reg_attack,
 			pdf=dp_shuriken,
 			pstnc=15, --proj stun chance
 		},
-			{ad=16} --second proj
+			{ad=16,a=0} --second proj
 		},							--only delay
 		r=2.9,
 		cmo=true
@@ -1041,7 +1043,9 @@ function def_monkeys()
 				this.ccs = max(2, this.ccs)
 				add(this.projs, merge(base_proj, {
 					pdf=dp_grape,
-					ad=20
+					ad=20,
+					paof=50,
+					a=triple_attack,
 				}))
 			end},
 			{250,120,"camo sight", function (this)
@@ -1082,7 +1086,7 @@ function def_monkeys()
 				this.i = max(43, this.i)
 				this.projs[1].pr += 1
 				this.projs[1].pdf = dp_laser
-				this.a = double_attack
+				this.projs[1].a = double_attack
 			end},
 			{5000,101,"plasma blasts",function (this)
 				this.i = max(59, this.i)
@@ -1091,12 +1095,13 @@ function def_monkeys()
 				this.projs[1].ad = 1
 				this.projs[1].plead = true
 				if this.ui2 < 4 then
-					this.a = reg_attack
+					this.projs[1].a = reg_attack
 				end
 			end},
 			{16500,102,"sun god",function (this)
 				this.i = 60
-				this.a = triple_attack
+				this.projs[1].paof = 20
+				this.projs[1].a = triple_attack
 				this.projs[1].pr = 15
 				this.projs[1].pdf = dp_sunbeam
 			end},
@@ -1111,7 +1116,7 @@ function def_monkeys()
 			end},
 			{9000,118,"robo monkey",function (this)
 				this.i = 61
-				this.a = double_attack
+				this.projs[1].a = double_attack
 				this.projs[1].pr += 2
 			end},
 		},
@@ -1225,10 +1230,56 @@ function update_monkeys()
 		end
 		
 		if playing then
-			b,dx,dy,d,k =	bloon_near(v.p,v.r*8,v.tg)
-			v.a(v,b,dx,dy,d,k)
-			if v.pshfn != nil then
-				v.pshfn(v)				
+			if v.adc <= 0 then
+				--calculate current proj
+				total = 0
+				for k,v in pairs(v.projs) do
+					if v.amt != nil then
+						total += v.amt
+					else
+						total += 1
+					end
+				end
+				
+				local p = nil
+				local cpi = 1
+				local i = v.proji
+				while p == nil do
+					local a = v.projs[cpi].amt or 1
+					if a >= i then
+						p = v.projs[cpi]
+						break
+					end
+					i -= a
+					cpi += 1
+				end
+				--p = current proj
+				
+				--find bloon in range
+				local b,dx,dy,d,k =	bloon_near(v.p,v.r*8,v.tg)
+				local r = false
+				if p.a != 0 then
+					r = p.a(v,p,b,dx,dy,d,k)
+				end
+				if p.a == 0 or r == true then
+					--reset
+					if v.adc == nil then
+						log(dump(v))
+					end
+					if p.ad == nil then
+						log(dump(p))
+					end
+					v.adc = p.ad
+					v.proji += 1
+					if v.proji > total then
+						v.proji = 1
+					end
+				end
+				
+				--call proj shoot func
+				if v.pshfn != nil then
+					v.pshfn(v)				
+				end
 			end
 		end
 		if v.adc > 0 then
@@ -1308,19 +1359,16 @@ function bloon_near(pos,r,sort)
 end
 
 function sniper_attack(this)
-	if this.adc <= 0 then
-		this.adc = this.projs[1].ad
-			--get bloon w. inf range
-		b,dx,dy,d,k = bloon_near({64,64},128,this.tg)
-		pop_bloon(k,this.projs[1].pp,this.projs[1].pmom)
-		this.lar = {dx/d,dy/d}
-		spwn_particle(this.p,dpr_sniper_fire,this.lar)
-	end	
+	--get bloon w. inf range
+	b,dx,dy,d,k = bloon_near({64,64},128,this.tg)
+	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom)
+	this.lar = {dx/d,dy/d}
+	spwn_particle(this.p,dpr_sniper_fire,this.lar)
+	return true
 end
 
-function double_attack(this,b,dx,dy,d,k)
-	if b != 0 and this.adc <= 0 then
-		this.adc = this.projs[1].ad
+function double_attack(this,p,b,dx,dy,d,k)
+	if b != 0 then
 		angle_offset = 90/370
 		poa = 2
 		tx = dx/d
@@ -1343,12 +1391,13 @@ function double_attack(this,b,dx,dy,d,k)
 				p
 			)
 		end
+		return true
 	end
 end
 
-function triple_attack(this,b,dx,dy,d,k)
-	if b != 0 and this.adc <= 0 then
-		angle_offset = 15/360
+function triple_attack(this,p,b,dx,dy,d,k)
+	if b != 0 then
+		angle_offset = p.paof/360
 		tx = dx/d
 		ty =	dy/d
 		ta = atan2(ty,tx)
@@ -1360,32 +1409,31 @@ function triple_attack(this,b,dx,dy,d,k)
 		}
 		this.lar = {tx,ty}
 		for k,v in pairs(dirs) do
-			p = copy(this.projs[1])
+			p = copy(p)
 			spwn_proj(
 				{this.p[1],this.p[2]},
 				{v[1],v[2]},
 				p
 			)
 		end
-		--reset
-		this.adc = this.projs[1].ad
+		return true
 	end
 end
 
-function rof_attack(this,b,dx,dy,d,k)
-	if b != 0 and this.adc <= 0 then
-		this.adc = this.projs[1].ad
+function rof_attack(this,p,b,dx,dy,d,k)
+	if b != 0 then
 		spwn_particle(this.p, dpr_rof)
 		bl = bloons_near(this.p, this.r*8)
 		for k,v in pairs(bl) do
 			bi = indexof(bloons, v)
 			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom)
 		end
+		return true
 	end
 end
 
-function tack_attack(this,b,dx,dy,d,k)
-	if b != 0 and this.adc <= 0 then
+function tack_attack(this,p,b,dx,dy,d,k)
+	if b != 0 then
 		dirs = {
 			{0,1},
 			{0,-1},
@@ -1404,55 +1452,23 @@ function tack_attack(this,b,dx,dy,d,k)
 				p
 			)
 		end
-		--reset
-		this.adc = this.projs[1].ad
+		return true
 	end
 end
 
-function reg_attack(this,b,dx,dy,d,k)
+function reg_attack(this,p,b,dx,dy,d,k)
 	if b != 0 then
-		if this.adc <= 0 then
-			total = 0
-			for k,v in pairs(this.projs) do
-				if v.amt != nil then
-					total += v.amt
-				else
-					total += 1
-				end
-			end
-			
-			p = nil
-			cpi = 1
-			i = this.proji
-			while p == nil do
-				a = this.projs[cpi].amt or 1
-				if a >= i then
-					p = this.projs[cpi]
-					break
-				end
-				i -= a
-				cpi += 1
-			end
-			if p.ps != nil then
-				x = this.p[1]
-				y = this.p[2]
-				mx = dx/d
-				my = dy/d
-				this.lar = {mx,my}
-				spwn_proj(
-					{x,y},
-					{mx,my},
-					p
-				)
-			end
-			
-			--reset
-			this.adc = p.ad
-			this.proji += 1
-			if this.proji > total then
-				this.proji = 1
-			end
-		end
+		x = this.p[1]
+		y = this.p[2]
+		mx = dx/d
+		my = dy/d
+		this.lar = {mx,my}
+		spwn_proj(
+			{x,y},
+			{mx,my},
+			p
+		)
+		return true
 	end
 end
 
@@ -1733,7 +1749,7 @@ function ph_bomb(this)
 			{-1,0}
 		}
 		for k,v in pairs(dirs) do
-			powner = {
+			nproj = {
 				pl=10,
 				pp=1,
 				pr=1,
@@ -1744,15 +1760,15 @@ function ph_bomb(this)
 				pvr=1,
 				pfrag=false,
 				pbig=false,
-				pbr=8
+				pbr=8,
 			}
 			if this.pfragbmb == true then
-				powner.phfn = ph_bomb
+				nproj.phfn = ph_bomb
 			end
 			spwn_proj(
 				{this.p[1],this.p[2]},
 				{v[1],v[2]},
-				powner
+				nproj
 			)
 		end
 	end
