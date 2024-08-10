@@ -200,7 +200,7 @@ bloon_types = {
   --white 7
 	{2/2,192,1,{4,4,5,5},{{8,7},{14,5},{2,6}},1},
   --zebra 8
-	{3/2,193,1,{6,7},{},1},
+	{3/2,193,1,{6,7},{{5,0}},1},
   --lead 9
 	{1.8/2,194,1,{6,6},{},1},
   --rainbow 10
@@ -1243,7 +1243,11 @@ function def_monkeys()
 		},
 		u2={
 			{300,125,"fireball",function (this)
-				this.projs[1].amt = 2
+				fpi = 1
+				if this.ui1 >= 3 then
+					fpi = 2
+				end
+				this.projs[fpi].amt = 2
 				add(this.projs, merge(base_proj, {
 					ad=5,
 					pdf=dp_fireball,
@@ -1769,7 +1773,7 @@ end
 function ph_lightning(this)
 	pts = {this.p}
 	
-	for i=1,40 do
+	for i=1,30 do
 		b,dx,dy,d,k = bloon_near(this.p,32,2,this.camo)
 		if b == 0 then
 			break
