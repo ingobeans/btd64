@@ -359,7 +359,6 @@ function player_input()
 			m,i = monkey_at(crp)
 			if m != false then
 				menu_crsr = 0
-				extra_info = false
 				in_menu = i
 				entered_menu = true
 			end
