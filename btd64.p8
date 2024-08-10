@@ -8,39 +8,45 @@ gnd = 28
 gnd_clr = 3
 
 sell_percent = 0.8
-
-waves_data = {
-	{25,{20,1}},
-	{15,{30,1}},
-	{15,{20,1},{5,2}},
-	{15,{30,1},{15,2}},
-	{15,{5,1},{25,2}},
-	{15,{15,1},{15,2},{4,3}},
-	{15,{20,1},{25,2},{5,3}},
-	{15,{10,1},{20,2},{14,3}},
-	{15,{30,3}},
-	{15,{102,2}},
-	{15,{10,1},{10,2},{12,3},{2,4}},
-	{15,{15,2},{10,3},{5,4}},
-	{15,{100,1},{23,3},{4,4}},
-	{15,{49,1},{15,2},{10,3},{9,4}},
-	{15,{20,1},{12,3},{5,4},{3,5}},
-}
+waves_data = [[
+	25|20,1
+	15|30,1
+	15|20,1|5,2
+	15|30,1|15,2
+	15|5,1|25,2
+	15|15,1|15,2|4,3
+	15|20,1|25,2|5,3
+	15|10,1|20,2|14,3
+	15|30,3
+	15|102,2
+	15|10,1|10,2|12,3|2,4
+	15|15,2|10,3|5,4
+	15|100,1|23,3|4,4
+	15|49,1|15,2|10,3|9,4
+	15|20,1|12,3|5,4|3,5
+]]
 
 --raw wave data
+lines = split(waves_data,"\n")
 waves = {}
-for k,v in pairs(waves_data) do
-	waves[k] = {}
-	for i,g in pairs(v) do
-		if i > 1 then
-			for l=1,g[1] do
-				add(waves[k],g[2])
+for k,l in pairs(lines) do
+	if k != #lines then
+		local d = split(l,"|")
+		local w = {d[1]}
+		for i,c in pairs(d) do
+			if i != 1 then
+				local vs = split(c,",")
+				for b=1,vs[1] do
+					add(w,vs[2])
+				end
 			end
 		end
+		add(waves,w)
 	end
 end
 
 function _init()
+	--log(#waves)
 	def_monkeys()
 end
 
@@ -50,7 +56,7 @@ end
 round = 0
 playing = false
 spawning = true
-spwn_index = 0
+spwn_index = 2
 spwn_timer = 0
 
 slowc = 0
@@ -63,7 +69,7 @@ function start_round()
 	round += 1
 	playing = true
 	spawning = true
-	spwn_index = 1
+	spwn_index = 2
 	spwn_timer = 0
 end
 
@@ -71,7 +77,7 @@ function spwn_bloons()
 	if playing and spawning then
 		spwn_timer -= gspd
 		if spwn_timer <= 0 then
-			spwn_timer = waves_data[round][1]
+			spwn_timer = waves[round][1]
 			t = waves[round][spwn_index]
 			sx = map_pts[1][1]*8
 			sy = map_pts[1][2]*8
