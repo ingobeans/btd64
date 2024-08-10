@@ -24,7 +24,7 @@ waves_data = [[
 	15|15,2|10,3|5,4
 	15|100,1|23,3|4,4
 	15|49,1|15,2|10,3|9,4
-	15|20,1|12,3|5,4|3,5
+	15|20,1c|12,3|5,4|3,5
 ]]
 
 --raw wave data
@@ -37,8 +37,14 @@ for k,l in pairs(lines) do
 		for i,c in pairs(d) do
 			if i != 1 then
 				local vs = split(c,",")
+				local cbt = vs[2]
+				--if data has q at end,
+				--make camo
+				if type(vs[2]) == "string" and sub(vs[2],-1,nil) == "c" then
+					cbt = tonum(sub(vs[2],1,#vs[2]-1)+100)
+				end
 				for b=1,vs[1] do
-					add(w,vs[2])
+					add(w,cbt)
 				end
 			end
 		end
@@ -172,7 +178,7 @@ function pop_bloon(bi,pp,pmom)
 	if b == nil then
 		return
 	end
-	bt = bloon_types[b.t]
+	bt = btype(b.t)
 	if bt[6] != 1 then
 		if b.h > 1 then
 			m = 1
@@ -213,6 +219,13 @@ function bloons_at(pos)
 	return b
 end
 
+function btype(t)
+	if t > 100 then
+  return bloon_types[t-100]
+	end
+	return bloon_types[t]
+end
+
 function spwn_bloon(pos,t,id,pt,s,ptss,cnf)
 	id = id or #bloons + 1
 	pt = pt or 1
@@ -226,7 +239,7 @@ function spwn_bloon(pos,t,id,pt,s,ptss,cnf)
 		s=s, --score
 		ptss=ptss, --point scores 
 		cnf=cnf, --confused
-		h=bloon_types[t][6], --health
+		h=btype(t)[6], --health
 		lmd={0,0}
 	})
 end
@@ -234,8 +247,11 @@ end
 function draw_bloons()
 	--h = nil
 	for k,v in pairs(bloons) do
-		bt = bloon_types[v.t]
+		bt = btype(v.t)
 		img = bt[2]
+		if v.t > 100 then
+			img += 16
+		end
 		bs = bt[3]
 		pcs = bt[5]
 		bmxh = bt[6]
@@ -283,7 +299,7 @@ function mv_bloons()
 		--end
 		mv = {0,0}
 		pt = map_pts[v.pt]
-		spd = bloon_types[v.t][1]*gspd
+		spd = btype(v.t)[1]*gspd
 		next_pt = map_pts[v.pt+1]
 		dix = v.p[1]-next_pt[1]*8
 		diy = v.p[2]-next_pt[2]*8
@@ -320,7 +336,7 @@ function mv_bloons()
 				v.cnf = false
 			end
 			if v.pt >= #map_pts then
-				lives -= #bloon_types[v.t][4]+1
+				lives -= #btype(v.t)[4]+1
 				del(bloons,v)
 			end
 		end
@@ -701,7 +717,7 @@ function new_mk(t)
 		vl=0,	--value
 		c=200,--cost
 		wb=false, --water bound
-		cmo=false, --camo
+		camo=false, --camo
 		tgt=0, --target (0 first, 1 strong, 2 near, 3 last)
 		i=1, --sprite
 		trac=14, --transparency colour
@@ -791,7 +807,6 @@ function def_monkeys()
 			{170,82,"sharper darts",function (this)
 				this.projs[1].pr += 2
 				this.projs[1].pl += 5
-				this.cmo = true
 				this.ccs=max(3,this.ccs)
 			end},
 			{330,83,"triple darts",function (this)
@@ -951,7 +966,7 @@ function def_monkeys()
 			{ad=16,a=0} --second proj
 		},							--only delay
 		r=2.9,
-		cmo=true
+		camo=true
 	})
 	bomb_shtr = new_mk({
 		cs={
@@ -1035,7 +1050,10 @@ function def_monkeys()
 			{2200,105,"destroyer", function (this)
 				this.ccs = 2
 				this.i = 42
-				this.projs[1].ad /= 5
+				for _,p in pairs(this.projs) do
+					p.ad /= 5
+				end
+				this.projs[1].amt = 5
 			end},
 		},
 		u2={
@@ -1256,7 +1274,7 @@ function update_monkeys()
 				--p = current proj
 				
 				--find bloon in range
-				local b,dx,dy,d,k =	bloon_near(v.p,v.r*8,v.tg)
+				local b,dx,dy,d,k =	bloon_near(v.p,v.r*8,v.tg,v.camo)
 				local r = false
 				if p.a != 0 then
 					r = p.a(v,p,b,dx,dy,d,k)
@@ -1307,11 +1325,14 @@ function spwn_monkey(pos,ti)
 	add(monkeys,n)
 end
 
-function bloons_near(pos,r)
+function bloons_near(pos,r,camo)
 	t = {}
 	tx = pos[1]
 	ty = pos[2]
 	for k,v in pairs(bloons) do
+		if v.t > 100 and camo != true then
+			goto continue
+		end
 		x = v.p[1]+4
 		y = v.p[2]+4
 		dx = (x-tx)
@@ -1320,6 +1341,7 @@ function bloons_near(pos,r)
 		if d < r then
 			add(t,v)
 		end
+		::continue::
 	end
 	return t
 end
@@ -1329,9 +1351,12 @@ end
 --1 strong
 --2 near
 --3 last
-function bloon_near(pos,r,sort)
+function bloon_near(pos,r,sort,camo)
 	b = {nil,0,0,0,0,0}
 	for k,v in pairs(bloons) do
+		if v.t > 100 and camo != true then
+			goto continue
+		end
 		x = v.p[1]+4
 		y = v.p[2]+4
 		tx = pos[1]
@@ -1354,13 +1379,14 @@ function bloon_near(pos,r,sort)
 				b={s,v,dx,dy,d,k}
 			end
 		end
+		::continue::
 	end
 	return b[2],b[3],b[4],b[5],b[6]
 end
 
 function sniper_attack(this)
 	--get bloon w. inf range
-	b,dx,dy,d,k = bloon_near({64,64},128,this.tg)
+	b,dx,dy,d,k = bloon_near({64,64},128,this.tg,this.camo)
 	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom)
 	this.lar = {dx/d,dy/d}
 	spwn_particle(this.p,dpr_sniper_fire,this.lar)
@@ -1423,7 +1449,7 @@ end
 function rof_attack(this,p,b,dx,dy,d,k)
 	if b != 0 then
 		spwn_particle(this.p, dpr_rof)
-		bl = bloons_near(this.p, this.r*8)
+		bl = bloons_near(this.p,this.r*8,false)
 		for k,v in pairs(bl) do
 			bi = indexof(bloons, v)
 			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom)
@@ -1551,7 +1577,7 @@ function update_proj()
 						
 					--check if can home
 					if v.phm == true then
-						b,dx,dy,d,bi = bloon_near(v.p,20,0)
+						b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
 						--dont home if very close
 						if d > 3 then
 							if b != 0 then
@@ -1682,7 +1708,7 @@ function ph_lightning(this)
 	pts = {this.p}
 	
 	for i=1,40 do
-		b,dx,dy,d,k = bloon_near(this.p,32,2)
+		b,dx,dy,d,k = bloon_near(this.p,32,2,this.camo)
 		if b == 0 then
 			break
 		end
@@ -1703,7 +1729,7 @@ end
 
 function ph_fireball(this)
 	spwn_particle(this.p,dpr_small_explosion)
-	bls = bloons_near(this.p, 8)
+	bls = bloons_near(this.p,8,this.camo)
 	for k,v in pairs(bls) do
 		pop_bloon(indexof(bloons,v),1,1)
 	end
@@ -1717,11 +1743,11 @@ end
 function ph_stun(this)
 	rng = rnd(100)
 	if rng < this.pstnc then
-		bls = bloons_near(this.p, 13)
+		bls = bloons_near(this.p,13,this.camo)
 		for k,v in pairs(bls) do
 			--dont confuse moabs
 			--or already confused bloons
-			if bloon_types[v.t][7] == false and 
+			if btype(v.t)[7] == false and 
 						v.cnf == false then
 				confuse_bloon(v)
 			end
@@ -1735,7 +1761,7 @@ function ph_bomb(this)
 		part = dpr_big_explosion
 	end
 	spwn_particle(this.p,part)
-	bls = bloons_near(this.p, this.pbr)
+	bls = bloons_near(this.p,this.pbr,this.camo)
 	for k,v in pairs(bls) do
 		pop_bloon(indexof(bloons,v),1,1)
 	end
