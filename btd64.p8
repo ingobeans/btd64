@@ -7,6 +7,7 @@ map_pts = {{-1,6},{3,6},{3,4},{6,4},{6,10},{1,10},{1,14},{11,14},{11,6},{16,6}}
 gnd = 28 --ground tile
 wtr = 31 --water tile
 gnd_clr = 3
+lead_id = 9
 
 sell_percent = 0.8
 waves_data = [[
@@ -235,12 +236,15 @@ function confuse_bloon(b,amt)
 	end
 end
 
-function pop_bloon(bi,pp,pmom)
+function pop_bloon(bi,pp,pmom,plead)
 	b = bloons[bi]
 	if b == nil then
 		return
 	end
 	bt = btype(b.t)
+	if b.t == lead_id and plead != true then
+		return
+	end
 	if bt[6] != 1 then
 		if b.h > 1 then
 			m = 1
@@ -1453,7 +1457,7 @@ end
 function sniper_attack(this)
 	--get bloon w. inf range
 	b,dx,dy,d,k = bloon_near({64,64},128,this.tg,this.camo)
-	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom)
+	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom,this.projs[1].plead)
 	this.lar = {dx/d,dy/d}
 	spwn_particle(this.p,dpr_sniper_fire,this.lar)
 	return true
@@ -1518,7 +1522,7 @@ function rof_attack(this,p,b,dx,dy,d,k)
 		bl = bloons_near(this.p,this.r*8,false)
 		for k,v in pairs(bl) do
 			bi = indexof(bloons, v)
-			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom)
+			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom,this.projs[1].plead)
 		end
 		return true
 	end
@@ -1628,10 +1632,10 @@ function update_proj()
 							--allow proj hit func
 							--to block bloon pop
 							if r != true then
-								pop_bloon(bi, v.pp, v.pmom)
+								pop_bloon(bi,v.pp,v.pmom,v.plead)
 							end
 						else
-							pop_bloon(bi, v.pp, v.pmom)
+							pop_bloon(bi,v.pp,v.pmom,v.plead)
 						end
 						
 						v.prc += 1
@@ -1778,7 +1782,7 @@ function ph_lightning(this)
 		if b == 0 then
 			break
 		end
-		pop_bloon(k,1,1)
+		pop_bloon(k,1,1,true)
 		add(pts,b.p)
 	end
 	
@@ -1797,7 +1801,7 @@ function ph_fireball(this)
 	spwn_particle(this.p,dpr_small_explosion)
 	bls = bloons_near(this.p,8,this.camo)
 	for k,v in pairs(bls) do
-		pop_bloon(indexof(bloons,v),1,1)
+		pop_bloon(indexof(bloons,v),1,1,true)
 	end
 end
 
@@ -1829,7 +1833,7 @@ function ph_bomb(this)
 	spwn_particle(this.p,part)
 	bls = bloons_near(this.p,this.pbr,this.camo)
 	for k,v in pairs(bls) do
-		pop_bloon(indexof(bloons,v),1,1)
+		pop_bloon(indexof(bloons,v),1,1,true)
 	end
 	--if frag upgrade
 	--spawn 4 new bombs
