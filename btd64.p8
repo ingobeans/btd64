@@ -1522,7 +1522,7 @@ function rof_attack(this,p,b,dx,dy,d,k)
 		bl = bloons_near(this.p,this.r*8,false)
 		for k,v in pairs(bl) do
 			bi = indexof(bloons, v)
-			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom,this.projs[1].plead)
+			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom,true)
 		end
 		return true
 	end
