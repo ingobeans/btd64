@@ -3,6 +3,8 @@ version 42
 __lua__
 --game data
 
+cartdata("ingobeans_btd64_61")
+
 maps = {
 	{28,{{-1,6},{3,6},{3,4},{6,4},{6,10},{1,10},{1,14},{11,14},{11,6},{16,6}}},
 	{44,{{-1,9},{8,9},{8,11},{13,11},{13,7},{7,7},{7,4},{4,4},{4,7},{0,7},{0,2}},{11,2},{11,4},{14,4},{14,0}}
@@ -11,6 +13,7 @@ map_pts = {}
 gnd = nil --ground tile
 wtr = 31 --water tile
 lead_id = 9
+save_g = 0
 
 sell_percent = 0.8
 waves_data = [[
@@ -87,7 +90,7 @@ for k,l in pairs(lines) do
 			if i != 1 then
 				local vs = split(c,",")
 				local cbt = vs[2]
-				--if data has q at end,
+				--if data has c at end,
 				--make camo
 				if type(vs[2]) == "string" and sub(vs[2],-1,nil) == "c" then
 					cbt = tonum(sub(vs[2],1,#vs[2]-1)+100)
@@ -102,6 +105,10 @@ for k,l in pairs(lines) do
 end
 
 function _init()
+	save_g = dget(0)
+	if save_g != 0 then
+		mm_map_i = 0
+	end
 	def_monkeys()
 end
 
@@ -149,6 +156,7 @@ function spwn_bloons()
 		if #bloons == 0 then
 			cash += 100
 			playing = false
+			saves()
 		end
 	end
 end
@@ -195,26 +203,34 @@ end
 
 function main_menu()
 	mx = #maps
+	mn = 1
+	if save_g != 0 then
+		mn = 0
+	end
 	if btnp(⬅️) then
 		mm_map_i -= 1
-		if mm_map_i <= 0 then
+		
+		if mm_map_i < mn then
 			mm_map_i = mx
 		end
 	end
 	if btnp(➡️) then
 		mm_map_i += 1
 		if mm_map_i > mx then
-			mm_map_i = 1
+			mm_map_i = mn
 		end
 	end
 	if btnp(❎) then
 		in_main_menu = false
-		map_pts = maps[mm_map_i][2]
-		gnd = maps[mm_map_i][1]
+		if mm_map_i == 0 then
+			mm_map_i = save_g
+			loads()
+		end
+		m = maps[mm_map_i]
+		map_pts = m[2]
+		gnd = m[1]
 	end
-	cls(0)
 	map(0,16)
-	
 	xo=12
 	yo=8
 	palt(0,false)
@@ -1965,6 +1981,76 @@ end
 -->8
 --functions
 
+function saves()
+	dset(0,mm_map_i)
+	dset(1,round)
+	dset(2,cash)
+	dset(3,health)
+	for i=4,63 do
+		mk = monkeys[i-3]
+		if mk != nil then
+			save_mk(mk,i)
+		end
+	end
+end
+
+function loads()
+	mm_map_i = dget(0)
+	round = dget(1)
+	cash = dget(2)
+	health = dget(3)
+	for i=4,63 do
+		d = dget(i)
+		if d == 0 then
+			break
+		end
+		load_mk(d,i)
+	end
+end
+
+function save_mk(mk,i)
+	dset(i,(((((mk.ti - 1) << 4) | (mk.p[1]-4)/8) << 4) | ((mk.p[2]-4)/8 - 1)) << 4 | ((mk.ui1 - 1) << 2) | (mk.ui2 - 1))	
+end
+
+function load_mk(d)
+	local mi = ((d >> 12) & 0b111)+1
+	local mk = deep(monkey_types[mi])
+	local px = (d >> 8) & 0b1111
+	local py = ((d >> 4) & 0b1111) + 1
+	local ui1 = ((d >> 2) & 0b11) + 1
+	local ui2 = (d & 0b11) + 1
+	mk.p = {px*8+4, py*8+4}
+	mk.ui1 = ui1
+	mk.ui2 = ui2
+	for u1=1,ui1-1 do
+		mk.u1[u1][4](mk)
+	end
+	for u2=1,ui2-1 do
+		mk.u2[u2][4](mk)
+	end
+	add(monkeys,mk)
+end
+
+function copy(org)
+	return deep(org)
+end
+
+function deep(org)
+	local t = {}
+	for k,v in pairs(org) do
+		if type(v) == "table" then
+			t[k] = deep(v)
+		else
+	  t[k] = v			
+		end
+	end
+	return t
+end
+
+function spr_r(s,x,y,a,w,h)
+	spr(s,x,y)
+end
+
 --functions disabled because
 --unused
 
@@ -2025,8 +2111,8 @@ function perf_o(x,y)
 	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
 	print("cpu:"..tostr(flr(cpu*100)).."%")
 end
---]===]
 
+--]===]
 function spr_r(s,x,y,a,w,h)
 	rspr(flr(s%16)*8,flr(s/16)*8,14*8,6*8,a,w)
  sspr(14*8,6*8,8*w,8*w,x,y,8*w,8*w)
@@ -2061,25 +2147,6 @@ function rspr(sx,sy,x,y,a,w)
 	end
 end
 
-function copy(org)
-	t = {}
-	for k,v in pairs(org) do
-  t[k] = v
-	end
-	return t
-end
-
-function deep(org)
-	local t = {}
-	for k,v in pairs(org) do
-		if type(v) == "table" then
-			t[k] = deep(v)
-		else
-	  t[k] = v			
-		end
-	end
-	return t
-end
 
 function indexof(array, value)
 	for i, v in ipairs(array) do
