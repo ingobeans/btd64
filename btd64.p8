@@ -516,8 +516,8 @@ function mv_crsr()
 		crsr[1] = 0
 	end
 	if crsr[2] < 1 do
-		crsr[2] = 15
-	elseif crsr[2] > 15 do
+		crsr[2] = 14
+	elseif crsr[2] > 14 do
 		crsr[2] = 1
 	end
 end
@@ -688,7 +688,6 @@ function draw_menu()
 		
 		--draw upgrade buttons
 		buttons = {m.u1[m.ui1],m.u2[m.ui2]}
-		print(m.projs[1].pp,22,22,0)
 
 		--lock upgrade paths
 		--by setting button to 0
