@@ -98,7 +98,6 @@ for k,l in pairs(lines) do
 end
 
 function _init()
-	--log(#waves)
 	def_monkeys()
 end
 
@@ -1351,12 +1350,6 @@ function update_monkeys()
 				end
 				if p.a == 0 or r == true then
 					--reset
-					if v.adc == nil then
-						log(dump(v))
-					end
-					if p.ad == nil then
-						log(dump(p))
-					end
 					v.adc = p.ad
 					v.proji += 1
 					if v.proji > total then
@@ -1589,9 +1582,6 @@ function update_proj()
 		v.plc += gspd
 		removed = false
 		
-		--to not hit same bloon twice
-		hit_bloons = {}
-		
 		--loop to repeat in case
 		--move direction changes
 		repeat_move = true
@@ -1624,9 +1614,7 @@ function update_proj()
 				for _,bd in pairs(bloons_hit) do
 					b = bd[1]
 					bi = bd[2]
-					if b != 0 and not has_value(hit_bloons, b) then
-						
-						--add(hit_bloons, b)
+					if b != 0 then
 						if v.phfn != nil then
 							r = v.phfn(v,b)
 							--allow proj hit func
@@ -1763,7 +1751,7 @@ function ph_firebreath(this)
 end
 
 function ph_whirlwind(this,b)
-	if not has_value(this.hit,b) then
+	if indexof(this.hit,b) == nil then
 		add(this.hit,b)
 		confuse_bloon(b,2)
 	else
@@ -1872,6 +1860,10 @@ end
 -->8
 --functions
 
+--functions disabled because
+--unused
+
+--[===[
 function dir_to(sp,tp)
 	x = sp[1]
 	y = sp[2]
@@ -1882,27 +1874,6 @@ function dir_to(sp,tp)
 	d = sqrt(dx^2+dy^2)
 	return {dx/d, dy/d}
 end
-
-function log(s)
-	cls(0)
-	cursor(0,0)
-	color(7)
-	print(s)
-	stop()
-end
-
-function perf_o(x,y)
-	x = x or 0
-	y = y or 0
-	rectfill(x,y,x+45,y+12,0)
-	cursor(x+1,y+1)
-	color(7)
-	mem = stat(0)
-	cpu = stat(1)
-	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
-	print("cpu:"..tostr(flr(cpu*100)).."%")
-end
-
 
 function dump(t,ind)
 	--stringify table
@@ -1930,22 +1901,34 @@ function dump(t,ind)
 	return s
 end
 
-function has_value (tab, val)
- for index, value in ipairs(tab) do
-	 if value == val then
-	  return true
-	 end
- end
-
- return false
+function log(s)
+	cls(0)
+	cursor(0,0)
+	color(7)
+	print(s)
+	stop()
 end
 
+function perf_o(x,y)
+	x = x or 0
+	y = y or 0
+	rectfill(x,y,x+45,y+12,0)
+	cursor(x+1,y+1)
+	color(7)
+	mem = stat(0)
+	cpu = stat(1)
+	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
+	print("cpu:"..tostr(flr(cpu*100)).."%")
+end
+--]===]
 
 function spr_r(s,x,y,a,w,h)
 	rspr(flr(s%16)*8,flr(s/16)*8,14*8,14*8,a,w)
  sspr(14*8,14*8,8*w,8*w,x,y,8*w,8*w)
 end
+
 rspr_clear_col=0
+
 function rspr(sx,sy,x,y,a,w)
 	local ca,sa=cos(a),sin(a)
 	local srcx,srcy,addr,pixel_pair
