@@ -470,14 +470,14 @@ function mv_crsr()
 	end
 	
 	if crsr[1] < 0 do
-		crsr[1] = 0
-	elseif crsr[1] > 15  do
 		crsr[1] = 15
+	elseif crsr[1] > 15  do
+		crsr[1] = 0
 	end
 	if crsr[2] < 1 do
-		crsr[2] = 1
-	elseif crsr[2] > 15 do
 		crsr[2] = 15
+	elseif crsr[2] > 15 do
+		crsr[2] = 1
 	end
 end
 -->8
@@ -551,9 +551,9 @@ function mv_menu_crsr()
 		mx = #monkey_types+1
 	end
 	if menu_crsr < 0 then
-		menu_crsr = 0
-	elseif menu_crsr > mx then
 		menu_crsr = mx
+	elseif menu_crsr > mx then
+		menu_crsr = 0
 	end
 end
 
