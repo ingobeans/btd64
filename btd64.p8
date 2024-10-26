@@ -1985,7 +1985,7 @@ end
 
 function loads()
 	mm_map_i = dget(0)
-	round = 45
+	round = dget(1)
 	cash = dget(2)
 	lives = dget(3)
 	for i=4,63 do
