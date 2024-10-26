@@ -5,10 +5,33 @@ __lua__
 
 cartdata("ingobeans_btd64_61")
 
-maps = {
-	{28,{{-1,6},{3,6},{3,4},{6,4},{6,10},{1,10},{1,14},{11,14},{11,6},{16,6}}},
-	{44,{{-1,9},{8,9},{8,11},{13,11},{13,7},{7,7},{7,4},{4,4},{4,7},{0,7},{0,2}},{11,2},{11,4},{14,4},{14,0}}
-}
+function load_wlf(wlf)
+	lines = split(wlf,"\n")
+	local da = {}
+	for k,l in pairs(lines) do
+	if k != #lines then
+		local d = split(l,"|")
+		local w = {d[1]}
+		for i,c in pairs(d) do
+				if i != 1 then
+					local vs = split(c,",")
+					--if data has c at end,
+					--make camo
+					cbt = vs[2]
+					if type(cbt) == "string" then
+						cbt = tonum(sub(cbt,1,#cbt-1)+100)
+					end
+					for b=1,vs[1] do
+						add(w,cbt)
+					end
+				end
+			end
+			add(da,w)
+		end
+	end
+	return da
+end
+
 map_pts = {}
 gnd = nil --ground tile
 wtr = 31 --water tile
@@ -80,29 +103,26 @@ waves_data = [[
 ]]
 
 --raw wave data
-lines = split(waves_data,"\n")
-waves = {}
-for k,l in pairs(lines) do
-	if k != #lines then
-		local d = split(l,"|")
-		local w = {d[1]}
-		for i,c in pairs(d) do
-			if i != 1 then
-				local vs = split(c,",")
-				local cbt = vs[2]
-				--if data has c at end,
-				--make camo
-				if type(vs[2]) == "string" and sub(vs[2],-1,nil) == "c" then
-					cbt = tonum(sub(vs[2],1,#vs[2]-1)+100)
-				end
-				for b=1,vs[1] do
-					add(w,cbt)
-				end
-			end
-		end
-		add(waves,w)
-	end
-end
+waves = load_wlf(waves_data)
+bloon_types = load_wlf([[
+	0.5|1,192|1,1|1,1|1,6060
+	0.75|1,192|1,1|1,1|1,1|1,6060|1,8|1,12|1,14|1,13|1,2|1,1
+	0.9|1,192|1,1|1,1|1,2|1,6060|1,8|1,11|1,14|1,4|1,2|1,3
+	1.6|1,192|1,1|1,1|1,3|1,6060|1,8|1,10|1,14|1,7|1,2|1,9
+	0.9|1,192|1,1|1,1|1,4|1,6060|1,8|1,14|1,14|1,7
+	0.9|1,192|1,1|1,1|1,4|1,4|1,5|1,5|1,6060|1,8|1,0
+	1.0|1,192|1,1|1,1|1,4|1,4|1,5|1,5|1,6060|1,8|1,7|1,14|1,5|1,2|1,6
+	1.5|1,193|1,1|1,1|1,6|1,7|1,6060|1,5|1,0
+	0.9|1,194|1,1|1,1|1,6|1,6|1,6060
+	1.1|1,195|1,1|1,1|1,8|1,6060
+	1.25|1,196|1,1|1,10|1,10|1,10|1,6060
+	0.5|1,204|1,2|1,200|1,11|1,11|1,11|1,11|1,6060
+	0.17|1,236|1,2|1,700|1,12|1,12|1,12|1,12|1,6060
+]])
+maps = load_wlf([[
+	28|1,-1|1,6|1,3|1,6|1,3|1,4|1,6|1,4|1,6|1,10|1,1|1,10|1,1|1,14|1,11|1,14|1,11|1,6|1,16|1,6
+	44|1,-1|1,9|1,8|1,9|1,8|1,11|1,13|1,11|1,13|1,7|1,7|1,7|1,7|1,4|1,4|1,4|1,4|1,7|1,0|1,7|1,0|1,2|1,11|1,2|1,11|1,4|1,14|1,4|1,14|1,0
+]])
 
 function _init()
 	save_g = dget(0)
@@ -121,8 +141,6 @@ spawning = true
 spwn_index = 2
 spwn_timer = 0
 
-slowc = 0
-slowdown = 0
 gspd = 1
 
 in_main_menu = true
@@ -144,8 +162,8 @@ function spwn_bloons()
 		if spwn_timer <= 0 then
 			spwn_timer = waves[round][1]
 			t = waves[round][spwn_index]
-			sx = map_pts[1][1]*8
-			sy = map_pts[1][2]*8
+			sx = map_pts[1]*8
+			sy = map_pts[2]*8
 			spwn_bloon({sx,sy},t)
 			spwn_index += 1
 			if spwn_index > #waves[round] then
@@ -227,8 +245,9 @@ function main_menu()
 			loads()
 		end
 		m = maps[mm_map_i]
-		map_pts = m[2]
 		gnd = m[1]
+		del(m,gnd)
+		map_pts = m
 	end
 	map(0,16)
 	xo=12
@@ -263,40 +282,10 @@ end
 -->8
 --bloons
 
---speed,img,size,{splits to},{{color from,color to}},health,moab
-
-bloon_types = {
-	--red 1
-	{1/2,192,1,{},{},1},
-	--blue 2
-	{1.5/2,192,1,{1},{{8,12},{14,13},{2,1}},1},
-	--green 3
-	{1.8/2,192,1,{2},{{8,11},{14,4},{2,3}},1},
-  --yellow 4
-	{3.2/2,192,1,{3},{{8,10},{14,7},{2,9}},1},
-  --pink 5
-	{1.8/2,192,1,{4},{{8,14},{14,7}},1},
-  --black 6
-	{1.8/2,192,1,{4,4,5,5},{{8,0}},1},
-  --white 7
-	{2/2,192,1,{4,4,5,5},{{8,7},{14,5},{2,6}},1},
-  --zebra 8
-	{3/2,193,1,{6,7},{{5,0}},1},
-  --lead 9
-	{1.8/2,194,1,{6,6},{},1},
-  --rainbow 10
-	{2.2/2,195,1,{8},{},1},
-  --ceramic 11
-	{2.5/2,196,1,{10,10},{},10},
-  --moab
-	{1/2,204,2,{11,11,11,11},{},200,true},
-		--bfb
-	{0.34/2,236,2,{12,12,12,12},{},700,true},
-}
-
 bloons = {}
 
 bloons_buffer = {}
+
 function empty_bloons_buffer()
 	for k,v in pairs(bloons_buffer) do
 		spwn_bloon(v[1],v[2],v[3],v[4],v[5],v[6],v[7])
@@ -304,44 +293,44 @@ function empty_bloons_buffer()
 	bloons_buffer = {}
 end
 
+--[[
 function calc_bloon_val(bt)
 	local bd = bloon_types[bt]
-	local v = bd[6]
+	local v = bd[4]
 	if #bd[4] == 0 then 
 		return 1
 	end
 	v += calc_bloon_val(bd[4][1])
 	return v
 end
-
+--]]
 function get_next_layer(bt,pp)
-	local v = pp
-	local cl = bt
+	local v = pp-1
+	local cl = (bt>100) and bt-100 or bt
 	while true do
 		local bd = btype(cl)
-		if bd == nil then
-			break
-		end
-		v -= bd[6]
+		v -= bd[4]
 		if v < 0 then
 			break
 		end
-		cl = bd[4][1]
-		if cl == nil then
+		if bd[5] == 6060 then
 			break
 		end
+		
+		cl = bd[5]
 	end
-	if cl == nil then
-		return {}
-	end
-	if bt > 100 then
-		t = {}
-		for g in all(bloon_types[cl][4]) do
-			add(t,g+100)
+	local t = {}
+	local	i = 5
+	local adr = (bt>100) and 100 or 0
+	while true do
+		local pv = bloon_types[cl][i]
+		if pv == 6060 then
+			break
 		end
-		return t
+		add(t,pv+adr)
+		i+=1
 	end
-	return bloon_types[cl][4]
+	return t
 end
 
 function confuse_bloon(b,amt)
@@ -425,13 +414,12 @@ function spwn_bloon(pos,t,id,pt,s,ptss,cnf)
 		s=s, --score
 		ptss=ptss, --point scores 
 		cnf=cnf, --confused
-		h=btype(t)[6], --health
+		h=btype(t)[4], --health
 		lmd={0,0}
 	})
 end
 
 function draw_bloons()
-	--h = nil
 	for k,v in pairs(bloons) do
 		bt = btype(v.t)
 		img = bt[2]
@@ -439,22 +427,23 @@ function draw_bloons()
 			img += 16
 		end
 		bs = bt[3]
-		pcs = bt[5]
-		bmxh = bt[6]
+		bmxh = bt[4]
 		
 		if bmxh != 1 then
 			if v.h < bmxh / 2 then
 				img += bs
 			end
 		end
-		
-		for k,c in pairs(pcs) do
-			pal(c[1], c[2])
+		is = indexof(bt,6060)
+		if is != nil then
+			for k=is+1,#bt,2 do
+				pal(bt[k], bt[k+1])
+			end
 		end
 		
 		--if moab, calculate angle
 		--of move, and draw rotated
-		if bt[7] == true then
+		if bs > 1 then
 			--print(v.h,v.p[1]+12,v.p[2],0)
 			--normalise move dir
 			md = sqrt(abs(v.lmd[1])^2+abs(v.lmd[2])^2)
@@ -479,14 +468,13 @@ end
 
 function mv_bloons()
 	for k,v in pairs(bloons) do
-		--if flr(v.p[1]/8) == crsr[1] and
-		--			flr(v.p[2]/8) == crsr[2] then
-		--	confuse_bloon(v)
-		--end
 		mv = {0,0}
-		pt = map_pts[v.pt]
 		spd = btype(v.t)[1]*gspd
-		next_pt = map_pts[v.pt+1]
+		
+		next_pt = {
+			map_pts[v.pt*2-1],
+			map_pts[v.pt*2]
+		}
 		dix = v.p[1]-next_pt[1]*8
 		diy = v.p[2]-next_pt[2]*8
 		ma = 0
@@ -521,8 +509,8 @@ function mv_bloons()
 			if v.cnf == v.pt then
 				v.cnf = false
 			end
-			if v.pt >= #map_pts then
-				lives -= #btype(v.t)[4]+1
+			if v.pt > #map_pts/2 then
+				lives -= 1
 				del(bloons,v)
 			end
 		end
@@ -1579,7 +1567,7 @@ end
 
 function double_attack(this,p,b,dx,dy,d,k)
 	if b != 0 then
-		angle_offset = 90/370
+		angle_offset = 0.25
 		poa = 2
 		tx = dx/d
 		ty =	dy/d
@@ -1985,9 +1973,10 @@ function saves()
 	dset(0,mm_map_i)
 	dset(1,round)
 	dset(2,cash)
-	dset(3,health)
+	dset(3,lives)
 	for i=4,63 do
 		mk = monkeys[i-3]
+		dset(i,0)
 		if mk != nil then
 			save_mk(mk,i)
 		end
@@ -1996,9 +1985,9 @@ end
 
 function loads()
 	mm_map_i = dget(0)
-	round = dget(1)
+	round = 45
 	cash = dget(2)
-	health = dget(3)
+	lives = dget(3)
 	for i=4,63 do
 		d = dget(i)
 		if d == 0 then
@@ -2047,14 +2036,14 @@ function deep(org)
 	return t
 end
 
-function spr_r(s,x,y,a,w,h)
-	spr(s,x,y)
-end
-
 --functions disabled because
 --unused
 
 --[===[
+function spr_r(s,x,y,a,w,h)
+	spr(s,x,y)
+end
+
 function dump(t,ind)
 	--stringify table
 	s = ""
@@ -2114,8 +2103,8 @@ end
 
 --]===]
 function spr_r(s,x,y,a,w,h)
-	rspr(flr(s%16)*8,flr(s/16)*8,14*8,6*8,a,w)
- sspr(14*8,6*8,8*w,8*w,x,y,8*w,8*w)
+	rspr(flr(s%16)*8,flr(s/16)*8,6*8,14*8,a,w)
+ sspr(6*8,14*8,8*w,8*w,x,y,8*w,8*w)
 end
 
 rspr_clear_col=0
@@ -2347,14 +2336,14 @@ e4444eeeeeeeeeeeccceccec00000000ee6666eeee0550eeee1cc1eeee9889eeeecccceeee1111ee
 0888888007777770055555500cbbbbc00499994004b99b400000000000000000000000000000000000000000000000001117ccc7ccccc7701117ddc7ccccc770
 00888800005575000055550000cccc00004444000044440000000000000000000000000000000000000000000000000011c7ccc7cccccc7711cddcc7ccdccc76
 000880000007700000055000000ee0000004400000044000000000000000000000000000000000000000000000000000ccc7cc77cccccc77cccdcc77ccddcc77
-0088ee00887755080066dd00008855000044ff0000885500000000000000000000000000000000000000000000000000ccc7cc77cccccc77ccc7cc77cccdcc77
-08888ee00885778806655dd00977855009444ff00977855000000000000000000000000000000000000000000000000011c7ccc7cccccc7711c7ccc7ccddcc77
-082288800788585006115550077999a004229940077999a00000000000000000000000000000000000000000000000001117ccc7ccccc7701117cdc7ccccc760
-0228888005788750011555500baaaab0022444400baaaab000000000000000000000000000000000000000000000000011007cc7cccc770011007dd7cccc7600
-0888822005588870055551100bbbb7700944422009444220000000000000000000000000000000000000000000000000110000c7cccc0000010000d6dccc0000
-0ee82280088778800dd51150055b77c00ff922400f59274000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00ee88000855758800dd55000055cc0000ff440000ff440000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000880008007700800055000000ee000000440000004400000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0088ee000077dd000066dd00008855000044ff0000885500000000000000000000000000000000000000000000000000ccc7cc77cccccc77ccc7cc77cccdcc77
+08888ee00dd57dd006655dd00977855009444ff00977855000000000000000000000000000000000000000000000000011c7ccc7cccccc7711c7ccc7ccddcc77
+0822888007d5555006115550077999a004229940077999a00000000000000000000000000000000000000000000000001117ccc7ccccc7701117cdc7ccccc760
+02288880057d7750011555500baaaab0022444400baaaab000000000000000000000000000000000000000000000000011007cc7cccc770011007dd7cccc7600
+0888822005555dd0055551100bbbb7700944422009444220000000000000000000000000000000000000000000000000110000c7cccc0000010000d6dccc0000
+0ee82280077dd7700dd51150055b77c00ff922400f59274000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00ee88000055750000dd55000055cc0000ff440000ff440000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000880000007d00000055000000ee000000440000004400000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00775500cccccddaadd8ddddddd8dbbbdeeedddd0000000088888888888888880000000000000000000000000000000000000000000000000000000000000000
 0777755000c00da00ad08ddddd80db00de0edddd0000000000880808000800080000000000000000000000000000000000000000000000000000000000000000
 07667770ddcdddaddadd8dd8dd8ddbbbdee0dddd0000000008080808088808880000000000000000000000000000000000000000000000000000000000000000
