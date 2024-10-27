@@ -146,7 +146,7 @@ ends = 0
 --1 loss screen
 --2 win screen
 
-gspd = 1
+fasts = false
 
 in_main_menu = true
 mm_map_i = 1
@@ -163,7 +163,7 @@ end
 
 function spwn_bloons()
 	if playing and spawning then
-		spwn_timer -= gspd
+		spwn_timer -= 1
 		if spwn_timer <= 0 then
 			spwn_timer = waves[round][1]
 			t = waves[round][spwn_index]
@@ -494,7 +494,7 @@ end
 function mv_bloons()
 	for k,v in pairs(bloons) do
 		mv = {0,0}
-		spd = btype(v.t)[1]*gspd
+		spd = btype(v.t)[1]
 		
 		next_pt = {
 			map_pts[v.pt*2-1],
@@ -703,10 +703,13 @@ function menu_input()
 					start_round()
 				end
 			elseif menu_crsr == 1 then
-				if gspd == 1 then
-					gspd = 3
+				fasts = not fasts
+				if fasts then
+					_set_fps(60)
+					_update60 = _update
 				else
-					gspd = 1
+					_set_fps(30)
+					_update60 = nil
 				end
 			else
 				mt = monkey_types[menu_crsr-1]
@@ -767,7 +770,7 @@ function draw_menu()
 			print("start round",130-w,2,5)
 		end
 		rectborder(128-w,10,127,20,12,15)
-		print("speed "..gspd.."x",130-w,12,15)
+		print("speed "..(fasts and "2" or "1").."x",130-w,12,15)
 		--draw monkey buttons
 		for k,v in pairs(monkey_types) do
 			rectfill(128-w,k*10+10,128-w+9,20+k*10,0)
@@ -1505,7 +1508,7 @@ function update_monkeys()
 			end
 		end
 		if v.adc > 0 then
-			v.adc -= gspd
+			v.adc -= 1
 		end
 	end
 end
@@ -1720,78 +1723,68 @@ end
 
 function update_proj()
 	for k,v in pairs(proj) do
-		v.plc += gspd
+		v.plc += 1
 		removed = false
-		
+
 		--loop to repeat in case
 		--move direction changes
 		repeat_move = true
 		while repeat_move do
 			repeat_move = false
-			tmx = v.mv[1]*v.ps*gspd
-			tmy = v.mv[2]*v.ps*gspd
-			
+			tmx = v.mv[1]*v.ps
+			tmy = v.mv[2]*v.ps
+
 			--split the movement of proj
 			--to chunks smaller than 5 px
 			--for a consistent collision
 			--detection
-			ttmx = {}
-			ttmy = {}
-			
-   for j=1,gspd do
-    add(ttmx, tmx/gspd)
-    add(ttmy, tmy/gspd)
+
+			if removed == true then
+				break
 			end
-			
-			for k,csmx in pairs(ttmx) do
-				if removed == true then
-					break
-				end
-				csmy = ttmy[k]
-				v.p[1] += csmx
-				v.p[2] += csmy
-				
-				bloons_hit = bloons_at(v.p)
-				for _,bd in pairs(bloons_hit) do
-					b = bd[1]
-					bi = bd[2]
-					if b != 0 then
-						if v.phfn then
-							r = v.phfn(v,b)
-							--allow proj hit func
-							--to block bloon pop
-							if r != true then
-								pop_bloon(bi,v.pp,v.pmom,v.plead)
-							end
+			v.p[1] += tmx
+			v.p[2] += tmy
+
+			bloons_hit = bloons_at(v.p)
+			for _,bd in pairs(bloons_hit) do
+				b = bd[1]
+				bi = bd[2]
+				if b != 0 then
+					if v.phfn then
+						r = v.phfn(v,b)
+						--allow proj hit func
+						--to block bloon pop
+						if r != true then
+							pop_bloon(bi,v.pp,v.pmom,v.plead)
+						end
 						else
 							pop_bloon(bi,v.pp,v.pmom,v.plead)
 						end
-						
+
 						v.prc += 1
 						if v.prc == v.pr then
 							removed = true
 							del(proj,v)
 							break
 						end
-						
-					--check if can home
-					if v.phm == true then
-						b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
-						--dont home if very close
-						if d > 3 then
-							if b != 0 then
-								v.mv = {dx/d,dy/d}
-								repeat_move = true
+
+						--check if can home
+						if v.phm == true then
+							b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
+							--dont home if very close
+							if d > 3 then
+								if b != 0 then
+									v.mv = {dx/d,dy/d}
+									repeat_move = true
 								break
 							end
 						end
 					end
 				end
-				end
 			end
 		end
 		if v.plc >= v.pl and 
-					removed == false then
+		removed == false then
 			del(proj,v)
 		end
 		if v.pdf != 0 then
@@ -1877,7 +1870,7 @@ end
 function dp_whirlwind(this)
 	x = this.p[1]-8
 	y = this.p[2]-8
-	this.anim += gspd
+	this.anim += 1
 	af = (flr(this.anim/5) % 2)*2
 	spr(150+af,x,y,2,2)
 end
@@ -2185,7 +2178,7 @@ end
 
 function draw_particles()
 	for k,v in pairs(particles) do
-		v[3] += gspd
+		v[3] += 1
 		if v[2](v) == true then
 			del(particles,v)
 		end
