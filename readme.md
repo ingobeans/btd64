@@ -20,6 +20,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - Add options to change monkey targetting (code already exists, just need to make UI options for it)
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Improve saves (can only save the first 59 monkeys, and it uses a lot of tokens)
+- Add sound effects & music (none so far)
 
 # Data
 
