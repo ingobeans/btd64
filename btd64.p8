@@ -719,7 +719,7 @@ function menu_input()
 				end
 			else
 				mt = monkey_types[menu_crsr-1]
-				if cash > mt.c then
+				if cash >= mt.c then
 					in_menu = -1
 					placing = menu_crsr-1
 				end
