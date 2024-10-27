@@ -189,11 +189,9 @@ end
 
 function main()
 	player_input()
+	menu_input()
 	mv_bloons()
-	cls(0)
-	map(16*mm_map_i-16)
 	
-	draw_bloons()
 	update_monkeys()
 	update_proj()
 	
@@ -205,9 +203,13 @@ end
 function _draw()
 	if not in_main_menu then
 		if ends == 0 then
+			cls(0)
+			map(16*mm_map_i-16)
+			draw_bloons()
 			draw_cursor()
 			draw_ui()
 			draw_tooltip()
+			draw_proj()
 			draw_particles()
 			draw_monkeys()
 		else
@@ -695,6 +697,10 @@ function mv_menu_crsr()
 end
 
 function menu_input()
+	if in_menu == -1 or entered_menu then
+		entered_menu = false
+		return
+	end
 	mv_menu_crsr()
 	if in_menu == 0 then
 		if btnp(❎) then
@@ -854,7 +860,7 @@ function draw_menu()
 		spr(64,128-w-8,menu_crsr*10+10)
 	end
 	if entered_menu == false then
-		menu_input()
+		--menu_input()
 	else
 		entered_menu = false
 	end
@@ -1721,6 +1727,14 @@ function spwn_proj(pos,mv,mk)
 	add(proj,p)
 end
 
+function draw_proj()
+	for k,v in pairs(proj) do
+		if v.pdf != 0 then
+			v.pdf(v)
+		end
+	end
+end
+
 function update_proj()
 	for k,v in pairs(proj) do
 		v.plc += 1
@@ -1731,8 +1745,6 @@ function update_proj()
 		repeat_move = true
 		while repeat_move do
 			repeat_move = false
-			tmx = v.mv[1]*v.ps
-			tmy = v.mv[2]*v.ps
 
 			--split the movement of proj
 			--to chunks smaller than 5 px
@@ -1742,8 +1754,8 @@ function update_proj()
 			if removed == true then
 				break
 			end
-			v.p[1] += tmx
-			v.p[2] += tmy
+			v.p[1] += v.mv[1]*v.ps
+			v.p[2] += v.mv[2]*v.ps
 
 			bloons_hit = bloons_at(v.p)
 			for _,bd in pairs(bloons_hit) do
@@ -1786,9 +1798,6 @@ function update_proj()
 		if v.plc >= v.pl and 
 		removed == false then
 			del(proj,v)
-		end
-		if v.pdf != 0 then
-			v.pdf(v)
 		end
 	end
 end
