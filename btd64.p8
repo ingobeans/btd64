@@ -685,7 +685,7 @@ function mv_menu_crsr()
 	elseif btnp(⬇️) then
 		menu_crsr += 1
 	end
-	mx = 2
+	mx = 3
 	if in_menu == 0 then
 		mx = 9--#monkey_types+1 - change if add new monkey
 	end
@@ -728,13 +728,18 @@ function menu_input()
 	else
 		m = monkeys[in_menu]
 		if btnp(❎) then
-			if menu_crsr == 2 then
+			if menu_crsr == 3 then
 				cash += flr(m.vl*sell_percent+0.5)
 				in_menu = -1
 				del(monkeys,m)
+			elseif menu_crsr == 0 then
+				m.tg += 1
+				if m.tg > 3 then
+					m.tg = 0
+				end
 			else
 				u = nil
-				if menu_crsr == 0 then
+				if menu_crsr == 1 then
 					if m.ui2 < 4 or m.ui1 != 3 then
 						u = m.u1[m.ui1]
 					end
@@ -745,7 +750,7 @@ function menu_input()
 				end
 				if u then
 					if cash >= u[1] then
-						if menu_crsr == 0 then
+						if menu_crsr == 1 then
 							m.ui1 += 1
 						else
 							m.ui2 += 1
@@ -811,7 +816,8 @@ function draw_menu()
 			buttons[2] = 1
 		end
 		
-		for k,v in pairs(buttons) do
+		for ki,v in pairs(buttons) do
+			local k = ki+1
 			if v == 0 then
 				rect(80,k*10,127,10+k*10,15)
 				spr(80,85,k*10+2)
@@ -840,7 +846,8 @@ function draw_menu()
 		end
 		
 		--draw upgrade progress
-		for k,v in pairs({m.ui1,m.ui2}) do
+		for ki,v in pairs({m.ui1,m.ui2}) do
+			local k = ki+1
 			for i=1,3 do
 				c = 3
 				
@@ -853,8 +860,19 @@ function draw_menu()
 			end
 		end
 		
-		rectborder(80,30,127,40,8,15)
-		print("sell $"..flr(m.vl*sell_percent+0.5),83,32,15)
+		--targeting button
+		rectborder(80,10,127,20,4,15)
+		ts = {
+			"first",
+			"strong",
+			"near",
+			"last"
+		}
+		print(ts[m.tg+1],83,12,15)
+	
+		--sell button	
+		rectborder(80,40,127,50,8,15)
+		print("sell $"..flr(m.vl*sell_percent+0.5),83,42,15)
 		
 		spr(64,72,menu_crsr*10+10)
 	end
@@ -927,14 +945,13 @@ function new_mk(t)
 		c=200,--cost
 		wb=false, --water bound
 		camo=false, --camo
-		tgt=0, --target (0 first, 1 strong, 2 near, 3 last)
 		i=1, --sprite
 		trac=14, --transparency colour
 		r=2.5, --range
 		proji=1, --current proj index
 		projs={base_proj},
 		adc=0, --attack delay counter
-		tg=0, --targeting
+		tg=0, --target (0 first, 1 strong, 2 near, 3 last)
 		lar={0,-1}, --last attack dir
 		u1={}, --upgrade path 1
 		u2={}, --upgrade path 2
