@@ -231,8 +231,8 @@ function main_menu()
 	--draw logo
 	--[[
 	spr(139,xo,yo,4,1)
-	spr(225,4.5*8+xo,yo,4,1)
-	spr(241,9*8+xo,yo,5,1)
+	spr(225,36+xo,yo,4,1)
+	spr(241,72+xo,yo,5,1)
 	--]]
 	
 	--border
@@ -537,7 +537,7 @@ end
 -->8
 --player
 
-cash = 650-- *10*5
+cash = 650-- *50
 lives = 100
 crsr = {8,8}
 
@@ -657,13 +657,13 @@ function draw_tooltip()
 	
 	print("🅾️ "..o,0,121,7)
 	if x != false then
-		print("❎ "..x,8*4,121,7)
+		print("❎ "..x,32,121,7)
 	end
 	if l != false then
-		print("⬅️ "..l,8*4+10*4,121,7)
+		print("⬅️ "..l,32+40,121,7)
 	end
 	if r != false then
-		print("➡️ "..r,8*4+10*4,121,7)
+		print("➡️ "..r,32+40,121,7)
 	end
 end
 
@@ -2115,14 +2115,14 @@ function perf_o(x,y)
 	color(7)
 	mem = stat(0)
 	cpu = stat(1)
-	print("mem:"..tostr(flr(mem/2048*100)).."% ("..tostr(flr(mem))..")")
+	print("mem:"..tostr(flr(mem/204800)).."% ("..tostr(flr(mem))..")")
 	print("cpu:"..tostr(flr(cpu*100)).."%")
 end
 
 --]===]
 function spr_r(s,x,y,a,w,h)
-	rspr(flr(s%16)*8,flr(s/16)*8,6*8,14*8,a,w)
- sspr(6*8,14*8,8*w,8*w,x,y,8*w,8*w)
+	rspr(flr(s%16)*8,flr(s/16)*8,48,112,a,w)
+ sspr(48,112,8*w,8*w,x,y,8*w,8*w)
 end
 
 rspr_clear_col=0
