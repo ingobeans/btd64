@@ -41,7 +41,7 @@ save_g = 0
 sell_percent = 0.8
 
 function _init()
-	save_g = dget(0)
+	save_g = dget()--implicit 0
 	if save_g != 0 then
 		mm_map_i = 0
 	end
@@ -191,30 +191,26 @@ function main()
 	player_input()
 	mv_bloons()
 	cls(0)
-	map(16*mm_map_i-16,0)
+	map(16*mm_map_i-16)
 	
 	draw_bloons()
 	update_monkeys()
 	update_proj()
 	
-	draw_cursor()
-	draw_ui()
-	draw_tooltip()
-	draw_particles()
 	empty_bloons_buffer()
 	spwn_bloons()
 	--perf_o(0,12)
 end
 
-function _update()
+function _draw()
 	if not in_main_menu then
 		if ends == 0 then
-			main()
+			draw_cursor()
+			draw_ui()
+			draw_tooltip()
+			draw_particles()
+			draw_monkeys()
 		else
-			if btnp(❎) then
-				dset(0,0)
-				run()
-			end
 			if ends == 1 then
 				cls(0)
 				color(8)
@@ -226,6 +222,19 @@ function _update()
 			end
 			print("press ❎ to return",30,118)
 		end
+	end
+end
+
+function _update()
+	if not in_main_menu then
+		if ends == 0 then
+			main()
+		else
+			if btnp(❎) then
+				dset()--implicit 0,0
+				run()
+			end
+		end
 	else
 		main_menu()
 	end
@@ -236,24 +245,11 @@ function main_menu()
 	
 	palt(0,false)
 	map(0,16)
-	xo=12
-	yo=8
-	
-	--draw logo
-	--[[
-	spr(139,xo,yo,4,1)
-	spr(225,36+xo,yo,4,1)
-	spr(241,72+xo,yo,5,1)
-	--]]
 	
 	--border
 	rectfill(10,18,117,117,0)
 	palt()
 	pal()
-	bw=24
-	bh=10
-	bx=(128-bw)/2
-	by=117-bh-6
 	
 	mn = 1
 	
@@ -277,9 +273,9 @@ function main_menu()
 		mn = 0
 	end
 	
-	--draw play button
-	rectborder(bx,by,bx+bw,by+bh,12,0)
-	print("play",bx+4,by+3,0)
+	-- draw play button
+	rectborder(52, 101, 76, 111, 12, 0)
+	print("play", 56, 104, 0)
 	
 	--input
 	
@@ -378,7 +374,7 @@ end
 
 function pop_bloon(bi,pp,pmom,plead)
 	b = bloons[bi]
-	if b == nil then
+	if not b then
 		return
 	end
 	bt = btype(b.t)
@@ -464,7 +460,7 @@ function draw_bloons()
 			end
 		end
 		is = indexof(bt,6060)
-		if is != nil then
+		if is then
 			for k=is+1,#bt,2 do
 				pal(bt[k], bt[k+1])
 			end
@@ -738,7 +734,7 @@ function menu_input()
 						u = m.u2[m.ui2]
 					end
 				end
-				if u != nil then
+				if u then
 					if cash >= u[1] then
 						if menu_crsr == 0 then
 							m.ui1 += 1
@@ -800,10 +796,10 @@ function draw_menu()
 		--nil gets skipped in
 		--pair loops so we flag
 		--nil values by 1
-		if	buttons[1] == nil then
+		if not buttons[1] then
 			buttons[1] = 1
 		end
-		if buttons[2] == nil then
+		if not buttons[2] then
 			buttons[2] = 1
 		end
 		
@@ -1439,7 +1435,7 @@ end
 
 monkeys = {}
 
-function update_monkeys()
+function draw_monkeys() 
 	for k,v in pairs(monkeys) do
 		a = atan2(v.lar[2],v.lar[1])-0.5
 		palt(0, false)
@@ -1456,13 +1452,17 @@ function update_monkeys()
 					placing == -1 then
 			circ(v.p[1],v.p[2],v.r*8,0)
 		end
-		
+	end
+end
+
+function update_monkeys()
+	for k,v in pairs(monkeys) do
 		if playing then
 			if v.adc <= 0 then
 				--calculate current proj
 				total = 0
 				for k,v in pairs(v.projs) do
-					if v.amt != nil then
+					if v.amt then
 						total += v.amt
 					else
 						total += 1
@@ -1472,7 +1472,7 @@ function update_monkeys()
 				local p = nil
 				local cpi = 1
 				local i = v.proji
-				while p == nil do
+				while not p do
 					local a = v.projs[cpi].amt or 1
 					if a >= i then
 						p = v.projs[cpi]
@@ -1499,7 +1499,7 @@ function update_monkeys()
 				end
 				
 				--call proj shoot func
-				if v.pshfn != nil then
+				if v.pshfn then
 					v.pshfn(v)				
 				end
 			end
@@ -1579,7 +1579,7 @@ function bloon_near(pos,r,sort,camo)
 				s = -v.s
 			end
 			
-			if b[1] == nil or s > b[1] then
+			if not b[1] or s > b[1] then
 				b={s,v,dx,dy,d,k}
 			end
 		end
@@ -1756,7 +1756,7 @@ function update_proj()
 					b = bd[1]
 					bi = bd[2]
 					if b != 0 then
-						if v.phfn != nil then
+						if v.phfn then
 							r = v.phfn(v,b)
 							--allow proj hit func
 							--to block bloon pop
@@ -1892,7 +1892,7 @@ function ph_firebreath(this)
 end
 
 function ph_whirlwind(this,b)
-	if indexof(this.hit,b) == nil then
+	if not indexof(this.hit,b) then
 		add(this.hit,b)
 		confuse_bloon(b,2)
 	else
@@ -2009,14 +2009,14 @@ function saves()
 	for i=4,63 do
 		mk = monkeys[i-3]
 		dset(i,0)
-		if mk != nil then
+		if mk then
 			save_mk(mk,i)
 		end
 	end
 end
 
 function loads()
-	mm_map_i = dget(0)
+	mm_map_i = dget()--implicit 0
 	round = dget(1)-1
 	cash = dget(2)
 	lives = dget(3)
@@ -2219,7 +2219,7 @@ function dpr_lightning(this)
 	pts = this[4]
 	for k,v in pairs(pts) do
 		np = pts[k+1]
-		if np == nil then
+		if not np then
 			break
 		end
 		line(v[1],v[2],np[1],np[2],14)
