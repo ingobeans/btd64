@@ -578,7 +578,7 @@ function player_input()
 			crp = {crsr[1]*8,crsr[2]*8}
 			
 			m,i = monkey_at(crp)
-			if m != false then
+			if m then
 				menu_crsr = 0
 				in_menu = i
 				entered_menu = true
@@ -662,19 +662,19 @@ function draw_tooltip()
 		o = "exit"
 		x = "confirm"
 	else
-		if monkey_at({crsr[1]*8,crsr[2]*8}) != false then
+		if monkey_at({crsr[1]*8,crsr[2]*8}) then
 			x = "select"		
 		end
 	end
 	
 	print("🅾️ "..o,0,121,7)
-	if x != false then
+	if x then
 		print("❎ "..x,32,121,7)
 	end
-	if l != false then
+	if l then
 		print("⬅️ "..l,72,121,7)
 	end
-	if r != false then
+	if r then
 		print("➡️ "..r,72,121,7)
 	end
 end
@@ -687,7 +687,7 @@ function mv_menu_crsr()
 	end
 	mx = 2
 	if in_menu == 0 then
-		mx = #monkey_types+1
+		mx = 9--#monkey_types+1 - change if add new monkey
 	end
 	if menu_crsr < 0 then
 		menu_crsr = mx
@@ -765,31 +765,30 @@ function menu_input()
 end
 
 function draw_menu()
-	w = 48
-	rectborder(128-w,0,127,127,4,15)
+	rectborder(80,0,127,127,4,15)
 	if in_menu == 0 then
 		if not playing then
-			rectfill(129-w,1,126,10,12)
-			print("start round",130-w,2,15)
+			rectfill(81,1,126,10,12)
+			print("start round",82,2,15)
 		else
-			rectfill(129-w,1,126,10,1)
-			print("start round",130-w,2,5)
+			rectfill(81,1,126,10,1)
+			print("start round",82,2,5)
 		end
-		rectborder(128-w,10,127,20,12,15)
-		print("speed "..(fasts and "2" or "1").."x",130-w,12,15)
+		rectborder(80,10,127,20,12,15)
+		print("speed "..(fasts and "2" or "1").."x",83,12,15)
 		--draw monkey buttons
 		for k,v in pairs(monkey_types) do
-			rectfill(128-w,k*10+10,128-w+9,20+k*10,0)
-			rect(128-w,k*10+10,127,20+k*10,15)
-			draw_base_monkey(k,{129-w,k*10+11})
-			print("$"..v.c,128-w+12,k*10+12,15)
+			rectfill(80,k*10+10,89,20+k*10,0)
+			rect(80,k*10+10,127,20+k*10,15)
+			draw_base_monkey(k,{81,k*10+11})
+			print("$"..v.c,92,k*10+12,15)
 		end
-		spr(64,128-w-8,menu_crsr*10)
+		spr(64,72,menu_crsr*10)
 	else
 		m = monkeys[in_menu]
-		rectfill(129-w,1,126,9,0)
-		print("upgrade",129-w+12,2,7)
-		draw_base_monkey(m.ti,{129-w,1})
+		rectfill(81,1,126,9,0)
+		print("upgrade",93,2,7)
+		draw_base_monkey(m.ti,{81,1})
 		
 		--draw upgrade buttons
 		buttons = {m.u1[m.ui1],m.u2[m.ui2]}
@@ -814,27 +813,27 @@ function draw_menu()
 		
 		for k,v in pairs(buttons) do
 			if v == 0 then
-				rect(128-w,k*10,127,10+k*10,15)
-				spr(80,130-w+3,k*10+2)
-				print("locked",128-w+12+3,k*10+2,15)
+				rect(80,k*10,127,10+k*10,15)
+				spr(80,85,k*10+2)
+				print("locked",95,k*10+2,15)
 				if extra_info then
-					rectborder(0,k*10,128-w,k*10+10,4,15)
+					rectborder(0,k*10,80,k*10+10,4,15)
 					print("path is locked",0+2,k*10+2,15)
 				end
 			elseif v == 1 then
-				rect(128-w,k*10,127,10+k*10,15)
-				print("max upg.",128-w+2+3,k*10+2,15)
+				rect(80,k*10,127,10+k*10,15)
+				print("max upg.",85,k*10+2,15)
 				if extra_info then
-					rectborder(0,k*10,128-w,k*10+10,4,15)
+					rectborder(0,k*10,80,k*10+10,4,15)
 					print("all upgrades",0+2,k*10+2,15)
 				end
 			else
-				rectfill(128-w+3,k*10,128-w+9+3,10+k*10,0)				
-				rect(128-w,k*10,127,10+k*10,15)
-				spr(v[2],130-w+3,k*10+2)
-				print("$"..v[1],128-w+12+3,k*10+2,15)
+				rectfill(83,k*10,92,10+k*10,0)
+				rect(80,k*10,127,10+k*10,15)
+				spr(v[2],85,k*10+2)
+				print("$"..v[1],95,k*10+2,15)
 				if extra_info then
-					rectborder(0,k*10,128-w,k*10+10,4,15)
+					rectborder(0,k*10,80,k*10+10,4,15)
 					print(v[3],0+2,k*10+2,15)
 				end
 			end
@@ -850,14 +849,14 @@ function draw_menu()
 					c = 11
 				end 
 				
-				rectfill(129-w,k*10+i*3-3+1,128-w+3,k*10+i*3,c)
+				rectfill(81,k*10+i*3-3+1,83,k*10+i*3,c)
 			end
 		end
 		
-		rectborder(128-w,30,127,40,8,15)
-		print("sell $"..flr(m.vl*sell_percent+0.5),130-w,32,15)
+		rectborder(80,30,127,40,8,15)
+		print("sell $"..flr(m.vl*sell_percent+0.5),83,32,15)
 		
-		spr(64,128-w-8,menu_crsr*10+10)
+		spr(64,72,menu_crsr*10+10)
 	end
 	if entered_menu == false then
 		--menu_input()
