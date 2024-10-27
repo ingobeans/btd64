@@ -1,4 +1,5 @@
 # btd64
+
 ![image](https://github.com/user-attachments/assets/94e71171-8fef-4a14-ad83-da31fee5db06)
 
 A Pico-8 demake of Bloons Tower Defense (5).
@@ -6,16 +7,16 @@ The code is really unreadable because of all the dumb techniques used to cram as
 
 # Features
 
-* 8 different monkeys from BTD5
-* Two upgrade paths, each with three upgrades
-* Automatically game saves after each round
-* The first 60 waves from BTD5
-* Three maps
+- 8 different monkeys from BTD5
+- Two upgrade paths, each with three upgrades
+- Automatically game saves after each round
+- The first 60 waves from BTD5
+- Three maps
 
 # Todo
-* Add options to change monkey targetting (code already exists, just need to make UI options for it)
-* More maps (new maps don't take up any tokens so there's a lot of space for more)
-* Add better UI for loading a game (currently just a black screen)
+
+- Add options to change monkey targetting (code already exists, just need to make UI options for it)
+- More maps (new maps don't take up any tokens so there's a lot of space for more)
 
 # Data
 
