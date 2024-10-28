@@ -151,7 +151,7 @@ entered_menu = false
 
 function set_game_vals()
 	lives = 100
-	cash = 650
+	cash = 6500
 	round = 0
 	monkeys = {}
 end
@@ -1477,9 +1477,18 @@ function draw_monkeys()
 		a = atan2(v.lar[2],v.lar[1])-0.5
 		palt(0, false)
 		palt(v.trac,true)
+		
+		sc = mm_map_i == 3 or (mm_map_i == 0 and save_g == 3)
+		if sc then
+			pal(5,1)
+		end
 		rspr_clear_col = v.trac
 		for _,c in pairs(v.cs[v.ccs]) do
-			pal(c[1],c[2])
+			local to = c[2]
+			if to == 5 and sc then
+				to = 1
+			end
+			pal(c[1],to)
 		end
 		spr_r(v.i, v.p[1]-4, v.p[2]-4,a,1,1)
 		pal()
