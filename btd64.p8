@@ -41,7 +41,6 @@ save_g = 0
 sell_percent = 0.8
 function _init()
 	def_monkeys()
-	--save_g = dget()--implicit 0
 	loads()
 end
 
@@ -209,12 +208,12 @@ function _draw()
 			cls(0)
 			map(16*mm_map_i-16)
 			draw_bloons()
-			draw_cursor()
-			draw_ui()
-			draw_tooltip()
 			draw_proj()
 			draw_particles()
 			draw_monkeys()
+			draw_cursor()
+			draw_ui()
+			draw_tooltip()
 		else
 			if ends == 1 then
 				cls(0)
