@@ -21,6 +21,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Add music
 - Fix sniper monkey randomly looking in the wrong direction when firing
+- Save monkey look direction
 
 # Saving
 
