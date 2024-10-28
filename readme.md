@@ -19,8 +19,8 @@ The code is really unreadable because of all the dumb techniques used to cram as
 # Todo
 
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
-- Improve saves (can only save the first 59 monkeys, and it uses a lot of tokens)
-- Add sound effects & music (none so far)
+- Improve saves (merge map id,lives,cash and round values in to a single integer)
+- Add music
 
 # Data
 
