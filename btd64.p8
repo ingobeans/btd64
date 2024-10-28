@@ -2069,7 +2069,7 @@ function loads()
 end
 
 function save_mk(mk, i)
-	a = flr((atan2(mk.lar[2],mk.lar[1])*15))
+	a = flr(atan2(mk.lar[2],mk.lar[1])*15+0.5)
 	v = mk.ti << 12 | mk.p[1] / 8 - 0.5 << 8 | mk.p[2] / 8 - 0.5 << 4 | mk.ui1 | mk.ui2 >> 4 | mk.tg >> 8 | a >> 12
 	dset(i, v)
 end
