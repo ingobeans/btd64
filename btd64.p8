@@ -3,7 +3,7 @@ version 42
 __lua__
 --game data
 
-cartdata("ingobeans_btd64_63")
+cartdata("ingobeans_btd64_64")
 
 function load_wlf(wlf)
 	lines = split(wlf,"\n")
@@ -44,9 +44,6 @@ function _init()
 	def_monkeys()
 	--save_g = dget()--implicit 0
 	loads()
-	if save_g != 0 then
-		mm_map_i = 0
-	end
 end
 
 -->8
@@ -149,7 +146,7 @@ ends = 0
 fasts = false
 
 in_main_menu = true
-mm_map_i = 1
+mm_map_i = 0
 
 entered_menu = false
 
@@ -2034,12 +2031,11 @@ end
 --functions
 
 function saves()
-	dset(0,mm_map_i)
-	dset(1,round)
-	dset(2,cash)
-	dset(3,lives)
-	for i=4,63 do
-		mk = monkeys[i-3]
+	g = mm_map_i << 12 | lives << 4 | round >> 4
+	dset(0,g)
+	dset(1,cash)
+	for i=2,63 do
+		mk = monkeys[i-1]
 		dset(i,0)
 		if mk then
 			save_mk(mk,i)
@@ -2048,12 +2044,16 @@ function saves()
 end
 
 function loads()
-	mm_map_i = dget()--implicit 0
-	round = dget(1)-1
-	cash = dget(2)
-	lives = dget(3)
-	save_g = mm_map_i
-	for i=4,63 do
+	g = dget()--implicit 0
+	cash = dget(1)
+	
+	save_g = g >> 12 & 0xf
+	lives = g >> 4 & 0b000011111111
+	round = g << 4 & 0b000011111111
+	
+	mm_map_i = save_g != 0 and 0 or 1
+	--stop()
+	for i=2,63 do
 		d = dget(i)
 		if d == 0 then
 			break

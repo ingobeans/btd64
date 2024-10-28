@@ -19,8 +19,32 @@ The code is really unreadable because of all the dumb techniques used to cram as
 # Todo
 
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
-- Improve saves (merge map id,lives,cash and round values in to a single integer)
 - Add music
+
+# Saving
+
+Game saves after each round, saving lives, round, cash, map index and the first 62 monkeys.
+
+### Save Structure
+
+Index 0 stores:
+
+- Map index (first 4 bits),
+- Lives (the following 8 bits)
+- Round (the following 8 bits)
+
+Index 1 stores cash
+
+All following entries store a monkey, i.e. indices 2-63.
+
+Monkey data is formatted like:
+
+- Monkey type index (first 4 bits)
+- Monkey X (following 4 bits)
+- Monkey Y (following 4 bits)
+- Monkey upgrade index path 1 (following 4 bits)
+- Monkey upgrade index path 2 (following 4 bits)
+- Monkey targeting (following 4 bits)
 
 # Data
 
