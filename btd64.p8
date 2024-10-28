@@ -1626,9 +1626,13 @@ end
 
 function sniper_attack(this)
 	--get bloon w. inf range
-	b,dx,dy,d,k = bloon_near({64,64},128,this.tg,this.camo)
-	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom,this.projs[1].plead)
+	b,dx,dy,d,k = bloon_near(this.p,255,this.tg,this.camo)
+	if b == 0 then
+		return false
+	end
 	this.lar = {dx/d,dy/d}
+	pop_bloon(k,this.projs[1].pp,this.projs[1].pmom,this.projs[1].plead)
+
 	spwn_particle(this.p,dpr_sniper_fire,this.lar)
 	return true
 end
