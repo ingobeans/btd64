@@ -2066,8 +2066,8 @@ function loads()
 	cash = dget(1)
 	
 	save_g = g >> 12 & 0xf
-	lives = g >> 4 & 0b000011111111
-	round = g << 4 & 0b000011111111
+	lives = g >> 4 & 0xff
+	round = g << 4 & 0xff
 	mm_map_i = 0
 	
 	for i=2,63 do
