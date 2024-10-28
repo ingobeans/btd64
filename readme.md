@@ -20,7 +20,6 @@ The code is really unreadable because of all the dumb techniques used to cram as
 
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Add music
-- Save monkey look direction
 
 # Saving
 
@@ -46,6 +45,7 @@ Monkey data is formatted like:
 - Monkey upgrade index path 1 (following 4 bits)
 - Monkey upgrade index path 2 (following 4 bits)
 - Monkey targeting (following 4 bits)
+- Monkey look direction (last 4 bits)
 
 # Data
 

@@ -39,7 +39,6 @@ lead_id = 9
 save_g = 0
 
 sell_percent = 0.8
-
 function _init()
 	def_monkeys()
 	--save_g = dget()--implicit 0
@@ -2049,14 +2048,18 @@ end
 
 function loads()
 	g = dget()--implicit 0
+	if g == 0 then
+		mm_map_i = 1
+		return
+	end
 	cash = dget(1)
 	
 	save_g = g >> 12 & 0xf
 	lives = g >> 4 & 0b000011111111
 	round = g << 4 & 0b000011111111
 	
-	mm_map_i = save_g != 0 and 0 or 1
-	--stop()
+	mm_map_i = 0
+	
 	for i=2,63 do
 		d = dget(i)
 		if d == 0 then
@@ -2067,7 +2070,8 @@ function loads()
 end
 
 function save_mk(mk, i)
-	v = mk.ti << 12 | mk.p[1] / 8 - 0.5 << 8 | mk.p[2] / 8 - 0.5 << 4 | mk.ui1 | mk.ui2 >> 4 | mk.tg >> 8
+	a = flr((atan2(mk.lar[2],mk.lar[1])*15))
+	v = mk.ti << 12 | mk.p[1] / 8 - 0.5 << 8 | mk.p[2] / 8 - 0.5 << 4 | mk.ui1 | mk.ui2 >> 4 | mk.tg >> 8 | a >> 12
 	dset(i, v)
 end
 
@@ -2078,9 +2082,11 @@ function load_mk(v)
 	ui1 = v & 0xf
 	ui2 = v << 4 & 0xf
 	tg = v << 8 & 0xf
+	a = v << 12 & 0xf
 	local mk = deep(monkey_types[ti])
 	mk.p = {px*8+4, py*8+4}
 	mk.tg = tg
+	mk.lar = {sin(a/15),cos(a/15)}
 	mk.ui1 = ui1
 	mk.ui2 = ui2
 	for u1=1,ui1-1 do
