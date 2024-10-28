@@ -3,7 +3,7 @@ version 42
 __lua__
 --game data
 
-cartdata("ingobeans_btd64_61")
+cartdata("ingobeans_btd64_63")
 
 function load_wlf(wlf)
 	lines = split(wlf,"\n")
@@ -2047,18 +2047,21 @@ function loads()
 	end
 end
 
-function save_mk(mk,i)
-	dset(i,(((((mk.ti - 1) << 4) | (mk.p[1]-4)/8) << 4) | ((mk.p[2]-4)/8 - 1)) << 4 | ((mk.ui1 - 1) << 2) | (mk.ui2 - 1))	
+function save_mk(mk, i)
+	v = mk.ti << 12 | mk.p[1] / 8 - 0.5 << 8 | mk.p[2] / 8 - 0.5 << 4 | mk.ui1 | mk.ui2 >> 4 | mk.tg >> 8
+	dset(i, v)
 end
 
-function load_mk(d)
-	local mi = ((d >> 12) & 0b111)+1
-	local mk = deep(monkey_types[mi])
-	local px = (d >> 8) & 0b1111
-	local py = ((d >> 4) & 0b1111) + 1
-	local ui1 = ((d >> 2) & 0b11) + 1
-	local ui2 = (d & 0b11) + 1
+function load_mk(v)
+	ti = v >> 12 & 0xf
+	px = v >> 8 & 0xf
+	py = v >> 4 & 0xf
+	ui1 = v & 0xf
+	ui2 = v << 4 & 0xf
+	tg = v << 8 & 0xf
+	local mk = deep(monkey_types[ti])
 	mk.p = {px*8+4, py*8+4}
+	mk.tg = tg
 	mk.ui1 = ui1
 	mk.ui2 = ui2
 	for u1=1,ui1-1 do
