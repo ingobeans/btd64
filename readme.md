@@ -11,7 +11,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - Two upgrade paths, each with three upgrades
 - Automatically game saves after each round
 - The first 60 waves from BTD5
-- Three maps
+- Four maps
 - UI tooltips
 - Monkey upgrade information (press left/right in upgrade menu to show/hide upgrade desc)
 - Monkey targeting options
