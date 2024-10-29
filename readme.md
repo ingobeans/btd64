@@ -21,6 +21,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Add music
 - Mouse cursor support
+- Add more rounds (perhaps to 65, 85 or 100)
 
 # Saving
 
