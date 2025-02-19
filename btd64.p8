@@ -152,7 +152,7 @@ entered_menu = false
 function set_game_vals()
 	lives = 100
 	cash = 650
-	round = 59
+	round = 0
 	monkeys = {}
 end
 
