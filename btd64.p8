@@ -151,7 +151,7 @@ entered_menu = false
 
 function set_game_vals()
 	lives = 100
-	cash = 650
+	cash = 650*650
 	round = 0
 	monkeys = {}
 end
@@ -378,7 +378,7 @@ function pop_bloon(bi,pp,pmom,plead)
 		return
 	end
 	bt = btype(b.t)
-	if b.t == lead_id and plead != true then
+	if (b.t == lead_id or b.t == lead_id + 100) and plead == false then
 		return
 	end
 	if bt[6] != 1 then
@@ -756,7 +756,7 @@ function menu_input()
 						cash -= u[1]
 						sfx(12)
 						m.vl += u[1]
-						u[4](m)
+						process_usl(m,u[4])
 					end
 				end
 			end
@@ -814,6 +814,8 @@ function draw_menu()
 		if not buttons[2] then
 			buttons[2] = 1
 		end
+		
+		--print(m.projs[1].pr,10,10)
 		
 		for ki,v in pairs(buttons) do
 			local k = ki+1
@@ -1006,72 +1008,60 @@ function def_monkeys()
 			{}
 		},
 		u1={
-			{90,65,"long range",function (this)
-				this.r = 2.9
-				this.ccs=max(2,this.ccs)
-			end},
-			{120,66,"longer range",function (this)
-				this.r = 3.4
-				this.ccs=max(3,this.ccs)
-				this.camo = true
-			end},
-			{500,67,"spikeball",function (this)
-				this.projs[1].pr += 17
-				this.projs[1].ad = 46
-				this.projs[1].ps = 2
-				this.projs[1].pl = 65
-				this.projs[1].pdf = dp_spikeball
-				this.i = 16
-			end}
+			{90,65,"long range",[[setm ccs 2
+set r 2.9]]},
+			{120,66,"longer range",[[set r 3.4
+setm ccs 3
+set camo 1]]},
+--todo: camo should be true
+			{500,67,"spikeball",[[set i 16
+sel projs 1
+add pr 17
+set ad 46
+set ps 2
+set pl 65
+setd pdf dp_spikeball]]
+			--todo:also fix add and stuf
+			
+			}
 		},
 		u2={
-			{140,81,"sharp darts",function (this)
-				this.projs[1].pr += 1
-				this.projs[1].pl += 5
-				this.ccs=max(2,this.ccs)
-			end},
-			{170,82,"sharper darts",function (this)
-				this.projs[1].pr += 2
-				this.projs[1].pl += 5
-				this.ccs=max(3,this.ccs)
-			end},
-			{330,83,"triple darts",function (this)
-				this.ccs = 3
-				this.i = 17
-				this.projs[1].paof = 15
-				this.projs[1].a = triple_attack
-			end}
+			{140,81,"sharp darts",[[setm ccs 2
+sel projs 1
+add pr 1
+add pl 5]]},
+			{170,82,"sharper darts",[[setm ccs 3
+sel projs 1
+add pr 2
+add pl 5]]},
+			{330,83,"triple darts",[[set ccs 3
+set i 17
+sel projs 1
+set paof 15
+setd a triple_attack]]}
 		}
 	})
 	
 	tack_shtr = new_mk({
 		u1={
-			{210,97,"fast shoot",function (this)
-				this.projs[1].ad -= 2
-			end},
-			{300,98,"faster shoot",function (this)
-				this.projs[1].ad -= 2
-				this.i = max(18, this.i)
-			end},
-			{2500,99,"ring of fire",function (this)
-				this.i = 33
-				this.projs[1].a = rof_attack
-			end},
+			{210,97,"fast shoot",[[sel projs 1
+sub ad 2]]},
+			{300,98,"faster shoot",[[setm i 18
+sel projs 1
+sub ad 2]]},
+			{2500,99,"ring of fire",[[set i 33
+sel projs 1
+setd a rof_attack]]},
 		},
 		u2={
-			{100,113,"long range",function (this)
-				this.r = 1.8
-			end},
-			{225,114,"longer range",function (this)
-				this.r = 2.2
-				this.i = max(18, this.i)
-			end},
-			{680,115,"blade shooter",function (this)
-				this.i = 34
-				this.projs[1].pdf = dp_blade
-				this.projs[1].pr += 7
-				this.projs[1].ad -= 1
-			end},
+			{100,113,"long range",[[set r 1.8]]},
+			{225,114,"longer range",[[set r 2.2
+setm i 18]]},
+			{680,115,"blade shooter",[[set i 34
+sel projs 1
+add pr 7
+sub ad 1
+setd pdf dp_blade]]},
 		},
 		i=2,
 		r=1.4,
@@ -1090,34 +1080,29 @@ function def_monkeys()
 			{{12,0}},
 		},
 		u1={
-			{350,71,"pop 4 layers, lead", function (this)
-				this.ccs = max(2,this.ccs)
-				this.projs[1].plead = true
-				this.projs[1].pp += 2
-			end},
-			{2200,72,"pop 7 layers!", function (this)
-				this.ccs = max(3,this.ccs)
-				this.projs[1].pp += 3
-			end},
-			{4000,73,"18 dmg (full cer)", function (this)
-				this.ccs = 4
-				this.projs[1].pp += 11
-			end},
+			{350,71,"pop 4 layers, lead",[[setm ccs 2
+sel projs 1
+set plead 1
+add pp 2]]},
+			--todo: plead should be true},
+			{2200,72,"pop 7 layers!",[[setm ccs 3
+sel projs 1
+add pp 3]]},
+			{4000,73,"18 dmg (full cer)",[[setm ccs 4
+sel projs 1
+add pp 11]]},
 		},
 		u2={
-			{400,87,"faster firing", function (this)
-				this.ccs = max(2,this.ccs)
-				this.projs[1].ad /= 1.4
-			end},
-			{300,88,"camo goggles", function (this)
-				this.camo = true
-				this.i = max(24,this.i)
-			end},
-			{3500,89,"3x fire rate", function (this)
-				this.projs[1].ad /= 3
-				this.i = 25
-				this.ccs = 2
-			end},
+			{400,87,"faster firing",[[setm ccs 2
+sel projs 1
+set ad 47]]},
+			{300,88,"camo goggles",[[setm i 24
+set camo 1]]},
+--todo: camo should be true not 1
+			{3500,89,"3x fire rate",[[setm ccs 2
+set i 25
+sel projs 1
+set ad 15]]},
 		},
 		projs={{
 			pr=1,
@@ -1142,30 +1127,23 @@ function def_monkeys()
 			{{10,8},{8,5}},
 		},
 		u1={
-			{300,68,"large range,faster",function(this)
-				this.r = 3.2
-				this.ad = 12
-				this.ccs=max(2,this.ccs)
-			end},
-			{300,69,"sharp shurikens",function(this)
-				this.pr = 3
-				this.ccs=max(5,this.ccs)
-			end},
-			{850,70,"double shot",function(this)
-				this.projs[1].amt = 2
-				this.ccs=6
-			end}
+			{300,68,"large range,faster",[[setm ccs 2
+set r 3.2
+set ad 12]]},
+			{300,69,"sharp shurikens",[[setm ccs 5
+set pr 3]]},
+			{850,70,"double shot",[[set ccs 6
+sel projs 1
+set amt 2]]}
 		},
 		u2={
-			{250,84,"seeking shuriken",function(this)
-				this.projs[1].phm = true
-				this.projs[1].pl += 10
-				this.ccs=max(3,this.ccs)
-			end},
-			{350,85,"distraction",function(this)
-				this.ccs=max(4,this.ccs)
-				this.projs[1].phfn = ph_stun
-			end},
+			{250,84,"seeking shuriken",[[setm ccs 3
+sel projs 1
+set phm 1
+add pl 10]]},--todo: phm should be true not 1
+			{350,85,"distraction",[[setm ccs 4
+sel projs 1
+setd phfn ph_stun]]},
 			{2750,86,"flash bomb",function(this)
 				this.ccs=7
 				np = merge(base_proj,{
@@ -1204,14 +1182,12 @@ function def_monkeys()
 			{{5,3},{6,11},{12,6}}
 		},
 		u1={
-			{200,77,"large range",function (this)
-				this.r += 0.3
-				this.ccs=max(2,this.ccs)
-			end},
-			{300,78,"frag bombs",function (this)
-				this.ccs=max(3,this.ccs)
-				this.projs[1].pfrag = true
-			end},
+			{200,77,"large range",[[setm ccs 2
+add r 0.3]]},
+			{300,78,"frag bombs",[[setm ccs 3
+sel projs 1
+set pfrag 1]] --todo: pfrag should be true
+},
 			{800,79,"cluster bombs",function (this)
 				this.ccs=max(4,this.ccs)
 				this.projs[1].pfragbmb = true
@@ -1221,28 +1197,23 @@ function def_monkeys()
 			end}
 		},
 		u2={
-			{400,93,"bigger bombs",function (this)
-				this.projs[1].pvr = 2
-				this.projs[1].pp = 2
-				this.projs[1].pbr = 12
-
-				this.ccs=max(2,this.ccs)
-			end},
-			{400,94,"missile launcher",function (this)
-				this.projs[1].pvr = 3
-				--this.projs[1].pp = 4
-				this.r += 0.1
-				this.projs[1].ad -= 0.4
-				this.projs[1].ps += 3
-				this.ccs=max(3,this.ccs)
-				this.ccs += 2
-				this.i = 20
-			end},
-			{900,95,"moab mauler",function (this)
-				this.projs[1].pvr = 4
-				this.projs[1].pmom = 10
-				this.i = 36
-			end}
+			{400,93,"bigger bombs",[[setm ccs 2
+sel projs 1
+set pvr 2
+set pp 2
+set pbr 12]]},
+			{400,94,"missile launcher",[[setm ccs 3
+add ccs 2
+add r 0.1
+set i 20
+sel projs 1
+set pvr 3
+sub ad 0.4
+add ps 3]]},
+			{900,95,"moab mauler",[[set i 36
+sel projs 1
+set pvr 4
+set pmom 10]]}
 		},
 		i=4,
 		c=650,
@@ -1265,20 +1236,16 @@ function def_monkeys()
 			{}
 		},
 		u1={
-			{400,103,"faster shooting", function (this)
-				this.projs[1].ad *= 0.75
-			end},
-			{180,104,"longer range", function (this)
-				this.ccs = max(2, this.ccs)
-				this.i = max(26,this.i)
-				this.r = 4.5
-			end},
-			{2200,105,"destroyer", function (this)
-				this.ccs = 2
-				this.i = 42
-				this.projs[1].ad /= 5
-				this.projs[1].amt = 5
-			end},
+			{400,103,"faster shooting",[[sel projs 1
+set ad 25]]},
+			{180,104,"longer range",[[setm ccs 2
+setm i 26
+set r 4.5]]},
+			{2200,105,"destroyer",[[setm ccs 2
+set i 42
+sel projs 1
+set amt 5
+set ad 6.5]]},
 		},
 		u2={
 			{500,119,"grape shot", function (this)
@@ -1291,11 +1258,9 @@ function def_monkeys()
 					a=triple_attack,
 				}))
 			end},
-			{250,120,"camo sight", function (this)
-				this.ccs = max(2, this.ccs)
-				this.i = max(26,this.i)			
-				this.camo = true	
-			end},
+			{250,120,"camo sight",[[setm ccs 2
+setm i 26
+set camo 1]]},
 			{1200,121,"bomb cannon", function (this)
 				this.ccs = 2
 				this.i = 58
@@ -1326,47 +1291,39 @@ function def_monkeys()
 	})
 	super = new_mk({
 		u1={
-			{3500,100,"laser blasts",function (this)
-				this.i = max(43, this.i)
-				this.projs[1].pr += 1
-				this.projs[1].pdf = dp_laser
-				this.projs[1].a = double_attack
-			end},
-			{5000,101,"plasma blasts",function (this)
-				this.i = max(59, this.i)
-				this.projs[1].pr += 1
-				this.projs[1].pdf = dp_plasma
-				this.projs[1].ad = 1
-				this.projs[1].plead = true
-				if this.ui2 < 4 then
-					this.projs[1].a = reg_attack
-				end
-			end},
-			{16500,102,"sun god",function (this)
-				this.i = 60
-				this.projs[1].paof = 20
-				this.projs[1].a = triple_attack
-				this.projs[1].pr = 15
-				this.projs[1].pdf = dp_sunbeam
-			end},
+			{3500,100,"laser blasts",[[setm i 43
+sel projs 1
+add pr 1
+setd pdf dp_laser
+setd a double_attack]]},
+			{5000,101,"plasma blasts",[[setm i 59
+sel projs 1
+add pr 1
+set ad 1
+set plead 1
+setd pdf dp_plasma
+setp a plasma_a]]},
+			{16500,102,"sun god",[[set i 60
+sel projs 1
+set paof 20
+setd a triple_attack
+set pr 15
+setd pdf dp_sunbeam]]},
 		},
 		u2={
-			{1000,116,"super range",function (this)
-				this.r += 1
-			end},
-			{1500,117,"epic range",function (this)
-				this.i = max(27, this.i)
-				this.r += 1
-			end},
-			{9000,118,"robo monkey",function (this)
-				this.i = 61
-				this.projs[1].a = double_attack
-				this.projs[1].pr += 2
-			end},
+			{1000,116,"super range",[[add r 1]]},
+			{1500,117,"epic range",[[setm i 27
+add r 1]]},
+			{9000,118,"robo monkey",[[set i 61
+sel projs 1
+setd a double_attack
+add pr 2
+setd plasma_a double_attack]]},
 		},
 		projs={{
 			ad=1.7,
-			pl=30
+			pl=30,
+			plasma_a=reg_attack
 		}},
 		i=11,
 		c=3500,
@@ -1378,11 +1335,8 @@ function def_monkeys()
 			{}
 		},
 		u1={
-			{300,109,"intense magic",function (this)
-				if this.ui2 < 3 then
-					this.projs[1].pr += 5
-				end
-			end},
+			{300,109,"intense magic",[[sel projs 1
+addp pr add_pr]]},
 			{1200,110,"lightning bolt",function (this)
 				this.i = max(21,this.i)
 				add(this.projs, merge(base_proj, {
@@ -1420,10 +1374,8 @@ function def_monkeys()
 					ps=2,
 				}))
 			end},
-			{300,126,"camo sense",function (this)
-				this.camo = true
-				this.i = max(21,this.i)
-			end},
+			{300,126,"camo sense",[[setm i 21
+set camo 1]]},
 			{4200,127,"dragon's breath",function (this)
 				this.i = 23
 				--make reg proj
@@ -1438,7 +1390,8 @@ function def_monkeys()
 					amt=32,
 					ps=1,
 					pl=30,
-					pmom=0.7,
+					pmom=0.7,			
+					add_pr=0,
 				})
 			end},
 		},
@@ -1451,6 +1404,7 @@ function def_monkeys()
 			pr=2,
 			ad=33,
 			pl=20,
+			add_pr=5,
 		}},
 	})
 end
@@ -1484,6 +1438,47 @@ function draw_monkeys()
 					crsr[2]*8 == v.p[2]-4 and 
 					placing == -1 then
 			circ(v.p[1],v.p[2],v.r*8,0)
+		end
+	end
+end
+
+function process_usl(mk,usl)
+	if type(usl) != "string" then
+		usl(mk)
+		return
+	end
+	t = mk
+	for l in all(split(usl,"\n")) do
+		p = split(l," ")
+		if p[1] == "sel" then
+			t = mk
+			for pp=2,#p do
+				t = t[p[pp]]
+			end
+		elseif p[1] == "set" then
+			t[p[2]] = p[3]
+		elseif p[1] == "add" then
+			t[p[2]] += p[3]
+		elseif p[1] == "sub" then
+			t[p[2]] -= p[3]
+		elseif p[1] == "setm" then
+			t[p[2]] = max(p[3],t[p[2]])
+		elseif p[1] == "setd" then
+			--setd will read from global
+			--variables
+			t[p[2]] = _ENV[p[3]]
+		elseif p[1] == "addp" then
+			--addp will add property val
+			--of arg 3 to property of
+			--arg 2
+			t[p[2]] += t[p[3]]
+		elseif p[1] == "setp" then
+			--same as addp but sets
+			t[p[2]] = t[p[3]]
+		else
+			print(l)
+
+			stop()
 		end
 	end
 end
@@ -1567,7 +1562,7 @@ function bloons_near(pos,r,camo)
 	tx = pos[1]
 	ty = pos[2]
 	for v in all(bloons) do
-		if v.t > 100 and camo != true then
+		if v.t > 100 and camo == false then
 			goto continue
 		end
 		x = v.p[1]+4
@@ -1592,7 +1587,7 @@ function bloon_near(pos,r,sort,camo)
 	b = {0,0,0,0,0}
 	bs = nil
 	for k,v in pairs(bloons) do
-		if v.t > 100 and camo != true then
+		if v.t > 100 and camo == false then
 			goto continue
 		end
 		x = v.p[1]+4
@@ -1811,7 +1806,7 @@ function update_proj()
 						end
 
 						--check if can home
-						if v.phm == true then
+						if v.phm != false then
 							b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
 							--dont home if very close
 							if d > 3 then
@@ -2000,7 +1995,7 @@ function ph_bomb(this)
 	
 	--if frag upgrade
 	--spawn 4 new bombs
-	if this.pfrag == true then
+	if this.pfrag == 1 then
 		dirs = {
 			{0,1},
 			{0,-1},
@@ -2098,7 +2093,7 @@ function load_mk(v)
 	for ugi,ugp in pairs(ud) do
 		for ui=1,ugi-1 do
 			u=ugp[ui]
-			u[4](mk)
+			process_usl(mk,u[4])
 			mk.vl+=u[1]
 		end
 	end
