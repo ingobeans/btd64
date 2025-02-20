@@ -137,10 +137,10 @@ spawning = true
 spwn_index = 2
 spwn_timer = 0
 
-ends = 0
 --0 not ended
 --1 loss screen
 --2 win screen
+ends = 0
 
 fasts = false
 
@@ -323,7 +323,7 @@ bloons = {}
 bloons_buffer = {}
 
 function empty_bloons_buffer()
-	for k,v in pairs(bloons_buffer) do
+	for v in all(bloons_buffer) do
 		spwn_bloon(v[1],v[2],v[3],v[4],v[5],v[6],v[7])
 	end
 	bloons_buffer = {}
@@ -394,7 +394,7 @@ function pop_bloon(bi,pp,pmom,plead)
 			end
 		end
 	end
-	for k,v in pairs(get_next_layer(b.t,pp)) do
+	for v in all(get_next_layer(b.t,pp)) do
 		p = {b.p[1], b.p[2]}
 		add(bloons_buffer,{
 		 p,v,bi,b.pt,b.s,b.ptss,b.cnf
@@ -489,7 +489,7 @@ function draw_bloons()
 end
 
 function mv_bloons()
-	for k,v in pairs(bloons) do
+	for v in all(bloons) do
 		mv = {0,0}
 		bd = btype(v.t)
 		spd = bd[1]
@@ -897,7 +897,7 @@ function draw_cursor()
 			end
 		end
 		if valid then
-			for k,v in pairs(monkeys) do
+			for v in all(monkeys) do
 				if v.p[1]-4 == crsr[1]*8 and
 							v.p[2]-4 == crsr[2]*8 then
 					valid = false
@@ -1276,7 +1276,7 @@ function def_monkeys()
 			{2200,105,"destroyer", function (this)
 				this.ccs = 2
 				this.i = 42
-				for _,p in pairs(this.projs) do
+				for p in all(this.projs) do
 					p.ad /= 5
 				end
 				this.projs[1].amt = 5
@@ -1461,7 +1461,7 @@ end
 monkeys = {}
 
 function draw_monkeys() 
-	for k,v in pairs(monkeys) do
+	for v in all(monkeys) do
 		a = atan2(v.lar[2],v.lar[1])-0.5
 		palt(0, false)
 		palt(v.trac,true)
@@ -1471,7 +1471,7 @@ function draw_monkeys()
 			pal(5,1)
 		end
 		rspr_clear_col = v.trac
-		for _,c in pairs(v.cs[v.ccs]) do
+		for c in all(v.cs[v.ccs]) do
 			local to = c[2]
 			if to == 5 and sc then
 				to = 1
@@ -1490,12 +1490,12 @@ function draw_monkeys()
 end
 
 function update_monkeys()
-	for k,v in pairs(monkeys) do
+	for v in all(monkeys) do
 		if playing then
 			if v.adc <= 0 then
 				--calculate current proj
 				total = 0
-				for k,v in pairs(v.projs) do
+				for v in all(v.projs) do
 					if v.amt then
 						total += v.amt
 					else
@@ -1549,7 +1549,7 @@ function draw_base_monkey(ti,pos)
 	
 	palt(0,false)
 	palt(mt.trac,true)
-	for _,c in pairs(mt.cs[mt.ccs]) do
+	for c in all(mt.cs[mt.ccs]) do
 		pal(c[1],c[2])	
 	end
 	spr(mt.i,pos[1],pos[2])
@@ -1567,7 +1567,7 @@ function bloons_near(pos,r,camo)
 	t = {}
 	tx = pos[1]
 	ty = pos[2]
-	for k,v in pairs(bloons) do
+	for v in all(bloons) do
 		if v.t > 100 and camo != true then
 			goto continue
 		end
@@ -1694,7 +1694,7 @@ function rof_attack(this,p,b,dx,dy,d,k)
 	if b != 0 then
 		spwn_particle(this.p, dpr_rof)
 		bl = bloons_near(this.p,this.r*8,false)
-		for k,v in pairs(bl) do
+		for v in all(bl) do
 			bi = indexof(bloons, v)
 			pop_bloon(bi,this.projs[1].pp,this.projs[1].pmom,true)
 		end
@@ -1714,7 +1714,7 @@ function tack_attack(this,p,b,dx,dy,d,k)
 			{-0.7,0.7},
 			{-0.7,-0.7}
 		}
-		for k,v in pairs(dirs) do
+		for v in all(dirs) do
 			p = deep(this.projs[1])
 			spwn_proj(
 				{this.p[1],this.p[2]},
@@ -1759,7 +1759,7 @@ function spwn_proj(pos,mv,mk)
 end
 
 function draw_proj()
-	for k,v in pairs(proj) do
+	for v in all(proj) do
 		if v.pdf != 0 then
 			v.pdf(v)
 		end
@@ -1767,7 +1767,7 @@ function draw_proj()
 end
 
 function update_proj()
-	for k,v in pairs(proj) do
+	for v in all(proj) do
 		v.plc += 1
 		removed = false
 
@@ -1789,7 +1789,7 @@ function update_proj()
 			v.p[2] += v.mv[2]*v.ps
 
 			bloons_hit = bloons_at(v.p)
-			for _,bd in pairs(bloons_hit) do
+			for bd in all(bloons_hit) do
 				b = bd[1]
 				bi = bd[2]
 				if b != 0 then
@@ -1962,7 +1962,7 @@ end
 function ph_fireball(this)
 	spwn_particle(this.p,dpr_small_explosion)
 	bls = bloons_near(this.p,8,this.camo)
-	for k,v in pairs(bls) do
+	for v in all(bls) do
 		pop_bloon(indexof(bloons,v),1,1,true)
 	end
 end
@@ -1976,7 +1976,7 @@ function ph_stun(this)
 	rng = rnd(100)
 	if rng < this.pstnc then
 		bls = bloons_near(this.p,13,this.camo)
-		for k,v in pairs(bls) do
+		for v in all(bls) do
 			--dont confuse moabs
 			--or already confused bloons
 			if btype(v.t)[7] == false and 
@@ -2008,7 +2008,7 @@ function ph_bomb(this)
 			{1,0},
 			{-1,0}
 		}
-		for k,v in pairs(dirs) do
+		for v in all(dirs) do
 			nproj = {
 				pl=10,
 				pp=1,
@@ -2232,7 +2232,7 @@ function	spwn_particle(p,dpr,data)
 end
 
 function draw_particles()
-	for k,v in pairs(particles) do
+	for v in all(particles) do
 		v[3] += 1
 		if v[2](v) == true then
 			del(particles,v)
