@@ -2091,12 +2091,19 @@ function load_mk(v)
 	mk.lar = {sin(a/15),cos(a/15)}
 	mk.ui1 = ui1
 	mk.ui2 = ui2
-	for u1=1,ui1-1 do
-		mk.u1[u1][4](mk)
+	
+	--load all upgrades
+	ud={}
+	ud[ui1]=mk.u1
+	ud[ui2]=mk.u2
+	for ugi,ugp in pairs(ud) do
+		for ui=1,ugi-1 do
+			u=ugp[ui]
+			u[4](mk)
+			mk.vl+=u[1]
+		end
 	end
-	for u2=1,ui2-1 do
-		mk.u2[u2][4](mk)
-	end
+	
 	add(monkeys,mk)
 end
 
