@@ -33,12 +33,11 @@ function load_wlf(wlf)
 end
 
 map_pts = {}
---gnd = nil --ground tile
 wtr = 31 --water tile
 lead_id = 9
 save_g = 0
-
 sell_percent = 0.8
+
 function _init()
 	def_monkeys()
 	loads()
