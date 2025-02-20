@@ -1000,6 +1000,49 @@ function def_monkeys()
 		pshfn=nil, --post shoot func
 		plead=false,	--lead
 	}
+	
+	grape_shot_proj = merge(base_proj, {
+		pdf=dp_grape,
+		ad=0,
+		pr=2,
+		paof=50,
+		a=triple_attack,
+	})
+	
+	boat_bomb_proj = merge(base_proj, {
+		ad=0,
+		ps=2,
+		pbr=8,
+		pl=20,
+		phfn=ph_bomb,
+		pdf=dp_bomb,
+		pfrag=false,
+		pfragbmb=false,
+		pbig=false,
+	})
+	
+	lightning_bolt_proj = merge(base_proj, {
+		ad=0,
+		pdf=0,
+		phfn=ph_lightning
+	})
+	whirlwind_proj = merge(base_proj, {
+		phfn=ph_whirlwind,
+		pl=49,
+		pr=30,
+		pdf=dp_whirlwind,
+		anim=0,
+		ps=2,
+		hit={},
+		ad=33,
+	})
+	fireball_proj = merge(base_proj, {
+		ad=5,
+		pdf=dp_fireball,
+		phfn=ph_fireball,
+		plead=true,
+		ps=2,
+	})
 
 	dart = new_mk({
 		cs={
@@ -1248,34 +1291,16 @@ set amt 5
 set ad 6.5]]},
 		},
 		u2={
-			{500,119,"grape shot", function (this)
-				this.ccs = max(2, this.ccs)
-				add(this.projs, merge(base_proj, {
-					pdf=dp_grape,
-					ad=0,
-					pr=2,
-					paof=50,
-					a=triple_attack,
-				}))
-			end},
+			{500,119,"grape shot",[[setm ccs 2
+sel projs
+setd 2 grape_shot_proj]]},
 			{250,120,"camo sight",[[setm ccs 2
 setm i 26
 set camo 1]]},
-			{1200,121,"bomb cannon", function (this)
-				this.ccs = 2
-				this.i = 58
-				add(this.projs, merge(base_proj, {
-					ad=0,
-					ps=2,
-					pbr=8,
-					pl=20,
-					phfn=ph_bomb,
-					pdf=dp_bomb,
-					pfrag=false,
-					pfragbmb=false,
-					pbig=false,
-				}))
-			end},
+			{1200,121,"bomb cannon",[[set ccs 2
+set i 58
+sel projs
+setd 3 boat_bomb_proj]]},
 		},
 		projs={{
 			pr=5,
@@ -1335,45 +1360,20 @@ setd plasma_a double_attack]]},
 			{}
 		},
 		u1={
-			{300,109,"intense magic",[[sel projs 1
+			{300,109,"intense magic",[[sel projs 2
 addp pr add_pr]]},
-			{1200,110,"lightning bolt",function (this)
-				this.i = max(21,this.i)
-				add(this.projs, merge(base_proj, {
-					ad=0,
-					pdf=0,
-					phfn=ph_lightning
-				}),1)
-			end},
-			{2000,111,"summon whirlwind",function (this)
-				this.i = 22
-				add(this.projs, merge(base_proj, {
-					phfn=ph_whirlwind,
-					pl=49,
-					pr=30,
-					pdf=dp_whirlwind,
-					anim=0,
-					ps=2,
-					hit={},
-					ad=33,
-				}))
-			end},
+			{1200,110,"lightning bolt",[[setm i 21
+sel projs
+setd 1 lightning_bolt_proj]]},
+			{2000,111,"summon whirlwind",[[set i 22
+sel projs
+setd 3 whirlwind_proj]]},
 		},
 		u2={
-			{300,125,"fireball",function (this)
-				fpi = 1
-				if this.ui1 >= 3 then
-					fpi = 2
-				end
-				this.projs[fpi].amt = 2
-				add(this.projs, merge(base_proj, {
-					ad=5,
-					pdf=dp_fireball,
-					phfn=ph_fireball,
-					plead=true,
-					ps=2,
-				}))
-			end},
+			{300,125,"fireball",[[sel projs 2
+set amt 2
+sel projs
+setd 4 fireball_proj]]},
 			{300,126,"camo sense",[[setm i 21
 set camo 1]]},
 			{4200,127,"dragon's breath",function (this)
@@ -1382,11 +1382,11 @@ set camo 1]]},
 				del(this.projs, this.projs[#this.projs-1])
 				--replace fireball proj
 				this.projs[#this.projs] = merge(this.projs[#this.projs], {
-					ad = 2,
+					ad=2,
 					pp=1,
-					pdf = dp_firebreath,
-					plead = true,
-					phfn = ph_firebreath,
+					pdf=dp_firebreath,
+					plead=1,
+					phfn=ph_firebreath,
 					amt=32,
 					ps=1,
 					pl=30,
@@ -1398,15 +1398,20 @@ set camo 1]]},
 		i=5,
 		r=2.9,
 		c=550,
-		projs={{
-			pdf=dp_magic_bolt,
-			ps=2,
-			pr=2,
-			ad=33,
-			pl=20,
-			add_pr=5,
-		}},
+		projs={},
 	})
+	for i=0,4 do
+		apprentice.projs[i] = merge(base_proj,{a=0,ad=0})	
+	end
+	apprentice.projs[2] = merge(base_proj,{
+		pdf=dp_magic_bolt,
+		ps=2,
+		pr=2,
+		ad=33,
+		pl=20,
+		add_pr=5
+	})
+	
 end
 -->8
 --monkeys
