@@ -1429,7 +1429,7 @@ setd a sub_attack]]},
 set ccs 3
 set sub 1
 sel projs 1
-set ad 30せ]]},
+set ad 30]]},
 		},
 		u2={
 			{459,90,"twin guns",[[setm ccs 2
