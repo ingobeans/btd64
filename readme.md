@@ -52,3 +52,7 @@ Monkey data is formatted like:
 # Data
 
 Data is loaded in my proprietary WLF format (weird line format). `data_to_wlf.py` compiles the `waves_data`, `bloon_types`, and `maps` from python arrays to WLF.
+
+# USL
+
+USL, or Upgrade Scripting Language, is a scripting language I made for this to store the actions of a monkeys' upgrades in a single string. It uses simple instructions such as `sel projs 1` and `setd a triple_attack`.
