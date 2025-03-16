@@ -7,7 +7,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 
 # Features
 
-- 8 different monkeys from BTD5
+- 9 different monkeys from BTD5
 - Two upgrade paths, each with three upgrades
 - Automatically game saves after each round
 - The first 60 waves from BTD5
