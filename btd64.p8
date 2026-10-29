@@ -218,6 +218,7 @@ function _draw()
 			draw_cursor()
 			draw_ui()
 			draw_tooltip()
+			draw_mouse_cursor()
 		else
 			if ends == 1 then
 				cls(0)
@@ -563,6 +564,13 @@ function monkey_at(pos)
 end
 
 function player_input()
+	update_mouse()
+
+	--close menu if click outside
+	if stat(34) > 0 and btnp(❎) and omx < 80 then
+		in_menu = -1
+	end
+
 	if in_menu == -1 then
 		mv_crsr()
 		if btnp(🅾️) then
@@ -598,15 +606,42 @@ end
 
 omx=stat(32)
 omy=stat(33)
-function mv_crsr()
-	--mouse stuff 
+mousem=false
+
+function draw_mouse_cursor()
+	if mousem then
+		spr(217,omx,omy)
+	end
+end
+
+function update_mouse()
 	mx=stat(32)
 	my=stat(33)
-	if mx != omx or my != omy then
-		crsr[1]=max(min(flr(mx/8),15),0)
-		crsr[2]=max(min(flr(my/8),14),1)
-		omx=mx
-		omy=my
+
+	-- mousem is whether mouse is used
+	-- goes to true when mouse is moved
+	mousem = mousem or (mx != omx or my != omy)
+
+	-- make mousem false if any key is pressed
+	-- and its not a mouse press (when stat(34) is 0)
+	if stat(34) == 0 then
+		for i=0,5 do
+			if btnp(i) then
+				mousem = false
+			end	
+		end 
+	end
+
+	omx=mx
+	omy=my
+end
+
+
+function mv_crsr()
+	--mouse stuff 
+	if mousem then
+		crsr[1]=max(min(flr(omx/8),15),0)
+		crsr[2]=max(min(flr(omy/8),14),1)
 	end
 
 	--regular keys
@@ -698,10 +733,21 @@ function mv_menu_crsr()
 	elseif btnp(⬇️) then
 		menu_crsr += 1
 	end
+	menu_crsr -= stat(36)
+	
 	mx = 3
 	if in_menu == 0 then
 		mx = 10--#monkey_types+1 - change if add new monkey
 	end
+
+	if mousem then
+		y = omy
+		if in_menu != 0 then
+			y -= 10
+		end
+		menu_crsr = max(min(flr(y/10),mx),0)
+	end
+
 	if menu_crsr < 0 then
 		menu_crsr = mx
 	elseif menu_crsr > mx then
@@ -803,7 +849,9 @@ function draw_menu()
 			draw_base_monkey(k,{81,k*10+11})
 			print("$"..v.c,92,k*10+12,15)
 		end
-		spr(64,72,menu_crsr*10)
+		if mousem == false or omx >= 80 then
+			spr(64,72,menu_crsr*10)
+		end
 	else
 		m = monkeys[in_menu]
 		rectfill(81,1,126,9,0)
@@ -891,7 +939,9 @@ function draw_menu()
 		rectborder(80,40,127,50,8,15)
 		print("sell $"..flr(m.vl*sell_percent+0.5),83,42,15)
 		
-		spr(64,72,menu_crsr*10+10)
+		if mousem == false or omx >= 80 then
+			spr(64,72,menu_crsr*10+10)
+		end
 	end
 	if entered_menu == false then
 		--menu_input()
@@ -2494,11 +2544,11 @@ aa000000050000000000500080899808ca8a8000e777e000aa777000a05000004111505005550000
 0888888007777770055555500cbbbbc00499994004b99b40c667766c00000000000000001111111cc11111111111111c1117ccc7ccccc7701117ddc7ccccc770
 00888800005575000055550000cccc000044440000444400cc6666cc00000000000000001111111cc11111111111111c11c7ccc7cccccc7711cddcc7ccdccc76
 000880000007700000055000000ee0000004400000044000cdd66ddc0000000000000000c111111cccccccccccccccccccc7cc77cccccc77cccdcc77ccddcc77
-0088ee000077dd000066dd00008855000044ff0000885500cc6666cc0000000000000000000000000000000000000000ccc7cc77cccccc77ccc7cc77cccdcc77
-08888ee00dd57dd006655dd00977855009444ff009778550c612216c000000000000000000000000000000000000000011c7ccc7cccccc7711c7ccc7ccddcc77
-0822888007d5555006115550077999a004229940077999a0c622226c00000000000000000000000000000000000000001117ccc7ccccc7701117cdc7ccccc760
-02288880057d7750011555500baaaab0022444400baaaab0c622226c000000000000000000000000000000000000000011007cc7cccc770011007dd7cccc7600
-0888822005555dd0055551100bbbb7700944422009444220cd6666dc0000000000000000000000000000000000000000110000c7cccc0000010000d6dccc0000
+0088ee000077dd000066dd00008855000044ff0000885500cc6666cc0000000000000000700000000000000000000000ccc7cc77cccccc77ccc7cc77cccdcc77
+08888ee00dd57dd006655dd00977855009444ff009778550c612216c000000000000000007700000000000000000000011c7ccc7cccccc7711c7ccc7ccddcc77
+0822888007d5555006115550077999a004229940077999a0c622226c00000000000000000777700000000000000000001117ccc7ccccc7701117cdc7ccccc760
+02288880057d7750011555500baaaab0022444400baaaab0c622226c000000000000000000770000000000000000000011007cc7cccc770011007dd7cccc7600
+0888822005555dd0055551100bbbb7700944422009444220cd6666dc0000000000000000007000000000000000000000110000c7cccc0000010000d6dccc0000
 0ee82280077dd7700dd51150055b77c00ff922400f592740cddddddc000000000000000000000000000000000000000000000000000000000000000000000000
 00ee88000055750000dd55000055cc0000ff440000ff4400ccd66dcc000000000000000000000000000000000000000000000000000000000000000000000000
 000880000007d00000055000000ee0000004400000044000cd6666dc000000000000000000000000000000000000000000000000000000000000000000000000
