@@ -13,14 +13,16 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - The first 60 waves from BTD5
 - Four maps
 - UI tooltips
+- Playable entirely with mouse OR keyboard
 - Monkey upgrade information (press left/right in upgrade menu to show/hide upgrade desc)
 - Monkey targeting options
+- Monkeys change sprites when upgraded
+- Double speed mode
 
 # Todo
 
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Add music
-- Mouse cursor support
 - Add more rounds (perhaps to 65, 85 or 100)
 
 # Saving
