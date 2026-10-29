@@ -35,9 +35,6 @@ function load_wlf(wlf)
 	return da
 end
 
--- mouse
-poke(0x5f2d, 3)
-
 map_pts = {}
 wtr = 31 --water tile
 lead_id = 9
@@ -291,8 +288,8 @@ function main_menu()
 	end
 	
 	-- draw play button
-	rectborder(52, 101, 76, 111, 12, 0)
-	print("play", 56, 104, 0)
+	rectborder(45, 101, 82, 111, 12, 0)
+	print("❎ play", 49, 104, 0)
 	
 	--input
 	
@@ -310,6 +307,11 @@ function main_menu()
 		end
 	end
 	if btnp(❎) then
+		-- mouse
+		poke(0x5f2d, 3)
+		omx=stat(32)
+		omy=stat(33)
+
 		in_main_menu = false
 		if mm_map_i == 0 then
 			mm_map_i = save_g
@@ -607,8 +609,6 @@ function player_input()
 	end
 end
 
-omx=stat(32)
-omy=stat(33)
 mousem=false
 
 function draw_mouse_cursor()
