@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 42
+version 43
 __lua__
 --game data
 
@@ -31,6 +31,9 @@ function load_wlf(wlf)
 	end
 	return da
 end
+
+-- mouse
+poke(0x5f2d, 3)
 
 map_pts = {}
 wtr = 31 --water tile
@@ -593,7 +596,20 @@ function player_input()
 	end
 end
 
+omx=stat(32)
+omy=stat(33)
 function mv_crsr()
+	--mouse stuff 
+	mx=stat(32)
+	my=stat(33)
+	if mx != omx or my != omy then
+		crsr[1]=max(min(flr(mx/8),15),0)
+		crsr[2]=max(min(flr(my/8),14),1)
+		omx=mx
+		omy=my
+	end
+
+	--regular keys
 	if btnp(⬅️) do
 		crsr[1] -= 1
 	elseif btnp(➡️) do
