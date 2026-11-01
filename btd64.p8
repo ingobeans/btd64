@@ -1007,28 +1007,54 @@ end
 
 monkey_types = {}
 
+--empty object
+empty_o = {}
+
+def_lar = {0,-1}
+def_cs = {{}}
+
 function new_mk(t)
-	base = {
-		p={0,0},	--pos
-		cs={{}}, --color states
-		ccs=1,	--current color state
-		vl=0,	--value
-		c=200,--cost
-		wb=false, --water bound
-		camo=false, --camo
-		i=1, --sprite
-		trac=14, --transparency colour
-		r=2.5, --range
-		proji=1, --current proj index
-		projs={base_proj},
-		adc=0, --attack delay counter
-		tg=0, --target (0 first, 1 strong, 2 near, 3 last)
-		lar={0,-1}, --last attack dir
-		u1={}, --upgrade path 1
-		u2={}, --upgrade path 2
-		ui1=1, --upgrade index 1
-		ui2=1 --upgrade index 2
-	}
+	-- {
+	-- 	p={0,0},	--pos
+	-- 	cs={{}}, --color states
+	-- 	ccs=1,	--current color state
+	-- 	vl=0,	--value
+	-- 	c=200,--cost
+	-- 	wb=false, --water bound
+	-- 	camo=false, --camo
+	-- 	i=1, --sprite
+	-- 	trac=14, --transparency colour
+	-- 	r=2.5, --range
+	-- 	proji=1, --current proj index
+	-- 	projs={base_proj},
+	-- 	adc=0, --attack delay counter
+	-- 	tg=0, --target (0 first, 1 strong, 2 near, 3 last)
+	-- 	lar={0,-1}, --last attack dir
+	-- 	u1={}, --upgrade path 1
+	-- 	u2={}, --upgrade path 2
+	-- 	ui1=1, --upgrade index 1
+	-- 	ui2=1 --upgrade index 2
+	-- }
+	base = {}
+	process_usl(base, [[set ccs 1
+set vl 0
+set c 200
+set wb false
+set camo false
+set i 1
+set trac 14
+set r 2.5
+set proji 1
+set adc 0
+set tg 0
+set ui1 1
+set ui2 1
+setdc u1 empty_o
+setdc u2 empty_o
+setdc lar def_lar
+setdc cs def_cs
+setdc projs def_projs]])
+
 	b = merge(base,t)
 	b.vl = b.c
 	b.ti = #monkey_types+1
@@ -1053,33 +1079,46 @@ function merge(b,n)
 end	
 
 function def_monkeys()
-	base_proj = {
-		a = reg_attack, --atack func
-		amt=1, --times to loop proj
-		ad=27, --attack delay
-		ps=4, --proj speed
-		pp=1, --proj pop power
-		phm=false, --proj homing
-		pr=1, --proj pierce
-		pdf=dp_dart, --proj draw func
-		pl=10, --proj lifetime
-		pvr=1, --proj variant
-		pmom=1, --proj moab dmg multi
-		phfn=nil, --proj hit func
-		pshfn=nil, --post shoot func
-		plead=false,	--lead
-	}
-	bomb_proj = merge(base_proj,{
-		ad=33,
-		ps=2,
-		pbr=8,
-		pl=20,
-		phfn=ph_bomb,
-		pdf=dp_bomb,
-		pfrag=false,
-		pfragbmb=false,
-		pbig=false,
-	})
+	-- 	a --atack func
+	-- 	amt --times to loop proj
+	-- 	ad --attack delay
+	-- 	ps --proj speed
+	-- 	pp --proj pop power
+	-- 	phm --proj homing
+	-- 	pr --proj pierce
+	-- 	pdf --proj draw func
+	-- 	pl --proj lifetime
+	-- 	pvr --proj variant
+	-- 	pmom --proj moab dmg multi
+	-- 	phfn --proj hit func
+	-- 	pshfn --post shoot func
+	-- 	plead	--lead
+	base_proj = {}
+	process_usl(base_proj, [[setd a reg_attack
+set amt 1
+set ad 27
+set ps 4
+set pp 1
+set phm 0
+set pr 1
+setd pdf dp_dart
+set pl 10
+set pvr 1
+set pmom 1
+set plead 0]])
+	def_projs = {base_proj}
+
+	bomb_proj = deep(base_proj)
+	process_usl(bomb_proj, [[set ad 33
+set ps 2
+set pbr 8
+set pl 20
+setd phfn ph_bomb
+setd pdf dp_bomb
+set pfragbmb 0
+set pbig 0
+set pfrag 0]]
+	)
 	
 	grape_shot_proj = merge(base_proj, {
 		pdf=dp_grape,
@@ -1263,7 +1302,7 @@ set amt 2]]}
 			{250,84,"seeking shuriken",[[setm ccs 3
 sel projs 1
 set phm 1
-add pl 10]]},--todo: phm should be true not 1
+add pl 10]]},
 			{350,85,"distraction",[[setm ccs 4
 sel projs 1
 setd phfn ph_stun]]},
@@ -1521,7 +1560,7 @@ setd 2 ballistic_proj]]},
 		projs={{
 			ad=23,
 			pdf=dp_sub_dart,
-			phm=true,
+			phm=1,
 			amt=3,
 			pl=60,
 		}},
@@ -1591,6 +1630,10 @@ function process_usl(mk,usl)
 			--setd will read from global
 			--variables
 			t[p[2]] = _ENV[p[3]]
+		elseif p[1] == "setdc" then
+			--setd will read from global
+			--variables
+			t[p[2]] = deep(_ENV[p[3]])
 		elseif p[1] == "addp" then
 			--addp will add property val
 			--of arg 3 to property of
@@ -1975,7 +2018,7 @@ function update_proj()
 						end
 
 						--check if can home
-						if v.phm != false then
+						if v.phm == 1 then
 							b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
 							--dont home if very close
 							if d > 3 then
@@ -2205,7 +2248,7 @@ function ph_bomb(this)
 				pbig=false,
 				pbr=8,
 			}
-			if this.pfragbmb == true then
+			if this.pfragbmb == 1 then
 				nproj.phfn = ph_bomb
 			end
 			spwn_proj(
