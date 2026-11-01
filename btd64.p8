@@ -387,7 +387,7 @@ function pop_bloon(bi,pp,pmom,plead)
 		return
 	end
 	bt = btype(b.t)
-	if (b.t == lead_id or b.t == lead_id + 100) and plead == false then
+	if (b.t == lead_id or b.t == lead_id + 100) and plead == 0 then
 		return
 	end
 	if bt[6] != 1 then
@@ -957,7 +957,7 @@ function draw_cursor()
 	clr = 7
 	if placing != -1 then
 		valid = true
-		if not monkey_types[placing].wb then
+		if monkey_types[placing].wb == 0 then
 			local t = mget(crsr[1]+mm_map_i*16-16,crsr[2])
 			if t != gnd and t != gnd-16 then
 				valid = false
@@ -1039,8 +1039,8 @@ function new_mk(t)
 	process_usl(base, [[set ccs 1
 set vl 0
 set c 200
-set wb false
-set camo false
+set wb 0
+set camo 0
 set i 1
 set trac 14
 set r 2.5
@@ -1120,48 +1120,45 @@ set pbig 0
 set pfrag 0]]
 	)
 	
-	grape_shot_proj = merge(base_proj, {
-		pdf=dp_grape,
-		ad=0,
-		pr=2,
-		paof=50,
-		a=triple_attack,
-	})
+	grape_shot_proj = deep(base_proj)
+	process_usl(grape_shot_proj, [[setd pdf dp_grape
+set ad 0
+set pr 2
+set paof 50
+setd a triple_attack]])
 	
-	boat_bomb_proj = merge(base_proj, {
-		ad=0,
-		ps=2,
-		pbr=8,
-		pl=20,
-		phfn=ph_bomb,
-		pdf=dp_bomb,
-		pfrag=false,
-		pfragbmb=false,
-		pbig=false,
-	})
+	boat_bomb_proj = deep(base_proj)
+	process_usl(boat_bomb_proj, [[set ad 0
+set ps 2
+set pbr 8
+set pl 20
+setd phfn ph_bomb
+setd pdf dp_bomb
+set pfrag 0
+set pfragbmb 0
+set pbig 0]])
 	
-	lightning_bolt_proj = merge(base_proj, {
-		ad=0,
-		pdf=0,
-		phfn=ph_lightning
-	})
-	whirlwind_proj = merge(base_proj, {
-		phfn=ph_whirlwind,
-		pl=49,
-		pr=30,
-		pdf=dp_whirlwind,
-		anim=0,
-		ps=2,
-		hit={},
-		ad=33,
-	})
-	fireball_proj = merge(base_proj, {
-		ad=5,
-		pdf=dp_fireball,
-		phfn=ph_fireball,
-		plead=true,
-		ps=2,
-	})
+	lightning_bolt_proj = deep(base_proj)
+	process_usl(lightning_bolt_proj, [[set ad 0
+set pdf 0
+setd phfn ph_lightning]])
+
+	whirlwind_proj = deep(base_proj)
+	process_usl(whirlwind_proj, [[setd phfn ph_whirlwind
+set pl 49
+set pr 30
+setd pdf dp_whirlwind
+set anim 0
+set ps 2
+setdc hit empty_o
+set ad 33]])
+
+	fireball_proj = deep(base_proj)
+	process_usl(fireball_proj, [[set ad 5
+setd pdf dp_fireball
+setd phfn ph_fireball
+set plead 1
+set ps 2]])
 
 	dart = new_mk({
 		cs={
@@ -1175,7 +1172,6 @@ set r 2.9]]},
 			{120,66,"longer range",[[set r 3.4
 setm ccs 3
 set camo 1]]},
---todo: camo should be true
 			{500,67,"spikeball",[[set i 16
 sel projs 1
 add pr 17
@@ -1246,7 +1242,6 @@ setd pdf dp_blade]]},
 sel projs 1
 set plead 1
 add pp 2]]},
-			--todo: plead should be true},
 			{2200,72,"pop 7 layers!",[[setm ccs 3
 sel projs 1
 add pp 3]]},
@@ -1270,7 +1265,7 @@ set ad 15]]},
 			pr=1,
 			pp=2,
 			ad=66,
-			plead=false,
+			plead=0,
 			pmom=1,
 			a=sniper_attack,
 		}},
@@ -1332,7 +1327,7 @@ setd phfn ph_stun]]},
 			{ad=16,a=0} --second proj
 		},							--only delay
 		r=2.9,
-		camo=true
+		camo=1
 	})
 	bomb_shtr = new_mk({
 		cs={
@@ -1348,11 +1343,11 @@ setd phfn ph_stun]]},
 add r 0.3]]},
 			{300,78,"frag bombs",[[setm ccs 3
 sel projs 1
-set pfrag 1]] --todo: pfrag should be true
+set pfrag 1]] 
 },
 			{800,79,"cluster bombs",function (this)
 				this.ccs=max(4,this.ccs)
-				this.projs[1].pfragbmb = true
+				this.projs[1].pfragbmb = 1
 				if this.i != 4 then
 					this.ccs=6
 				end
@@ -1417,7 +1412,7 @@ setd 3 boat_bomb_proj]]},
 			pr=5,
 			pp=1,
 			ad=30,
-			plead=false,
+			plead=0,
 		}},
 		c=525,
 		i=10,
@@ -1728,7 +1723,7 @@ function bloons_near(pos,r,camo)
 	tx = pos[1]
 	ty = pos[2]
 	for v in all(bloons) do
-		if v.t > 100 and camo == false then
+		if v.t > 100 and camo == 0 then
 			goto continue
 		end
 		x = v.p[1]+4
@@ -1753,7 +1748,7 @@ function bloon_near(pos,r,sort,camo)
 	b = {0,0,0,0,0}
 	bs = nil
 	for k,v in pairs(bloons) do
-		if v.t > 100 and camo == false then
+		if v.t > 100 and camo == 0 then
 			goto continue
 		end
 		x = v.p[1]+4
