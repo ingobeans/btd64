@@ -6,7 +6,7 @@ __lua__
 
 --game data
 
-cartdata("ingobeans_btd64_64_test2")
+cartdata("ingobeans_btd64_64")
 
 function load_wlf(wlf)
 	lines = split(wlf,"\n")
