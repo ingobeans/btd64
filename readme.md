@@ -10,7 +10,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - 9 different monkeys from BTD5
 - Two upgrade paths, each with three upgrades
 - Automatically game saves after each round
-- The first 60 waves from BTD5
+- The first 85 waves from BTD5 (though the game's performance tanks after round ~70)
 - Four maps
 - UI tooltips
 - Playable entirely with mouse OR keyboard
@@ -23,7 +23,6 @@ The code is really unreadable because of all the dumb techniques used to cram as
 
 - More maps (new maps don't take up any tokens so there's a lot of space for more)
 - Add music
-- Add more rounds (perhaps to 65, 85 or 100)
 
 # Saving
 
