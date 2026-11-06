@@ -387,7 +387,7 @@ function pop_bloon(bi,pp,pmom,plead)
 		return
 	end
 	bt = btype(b.t)
-	if (b.t == lead_id or b.t == lead_id + 100) and plead == false then
+	if (b.t == lead_id or b.t == lead_id + 100) and plead == 0 then
 		return
 	end
 	if bt[6] != 1 then
@@ -957,7 +957,7 @@ function draw_cursor()
 	clr = 7
 	if placing != -1 then
 		valid = true
-		if not monkey_types[placing].wb then
+		if monkey_types[placing].wb == 0 then
 			local t = mget(crsr[1]+mm_map_i*16-16,crsr[2])
 			if t != gnd and t != gnd-16 then
 				valid = false
@@ -1007,28 +1007,53 @@ end
 
 monkey_types = {}
 
+--empty object
+empty_o = {}
+
+def_lar = {0,-1}
+def_cs = {{}}
+
 function new_mk(t)
-	base = {
-		p={0,0},	--pos
-		cs={{}}, --color states
-		ccs=1,	--current color state
-		vl=0,	--value
-		c=200,--cost
-		wb=false, --water bound
-		camo=false, --camo
-		i=1, --sprite
-		trac=14, --transparency colour
-		r=2.5, --range
-		proji=1, --current proj index
-		projs={base_proj},
-		adc=0, --attack delay counter
-		tg=0, --target (0 first, 1 strong, 2 near, 3 last)
-		lar={0,-1}, --last attack dir
-		u1={}, --upgrade path 1
-		u2={}, --upgrade path 2
-		ui1=1, --upgrade index 1
-		ui2=1 --upgrade index 2
-	}
+	-- {
+	-- 	p={0,0},	--pos
+	-- 	cs={{}}, --color states
+	-- 	ccs=1,	--current color state
+	-- 	vl=0,	--value
+	-- 	c=200,--cost
+	-- 	wb=false, --water bound
+	-- 	camo=false, --camo
+	-- 	i=1, --sprite
+	-- 	trac=14, --transparency colour
+	-- 	r=2.5, --range
+	-- 	proji=1, --current proj index
+	-- 	projs={base_proj},
+	-- 	adc=0, --attack delay counter
+	-- 	tg=0, --target (0 first, 1 strong, 2 near, 3 last)
+	-- 	lar={0,-1}, --last attack dir
+	-- 	u1={}, --upgrade path 1
+	-- 	u2={}, --upgrade path 2
+	-- 	ui1=1, --upgrade index 1
+	-- 	ui2=1 --upgrade index 2
+	-- }
+	base = process_usl({}, [[set ccs 1
+set vl 0
+set c 200
+set wb 0
+set camo 0
+set i 1
+set trac 14
+set r 2.5
+set proji 1
+set adc 0
+set tg 0
+set ui1 1
+set ui2 1
+setdc u1 empty_o
+setdc u2 empty_o
+setdc lar def_lar
+setdc cs def_cs
+setdc projs def_projs]])
+
 	b = merge(base,t)
 	b.vl = b.c
 	b.ti = #monkey_types+1
@@ -1053,76 +1078,79 @@ function merge(b,n)
 end	
 
 function def_monkeys()
-	base_proj = {
-		a = reg_attack, --atack func
-		amt=1, --times to loop proj
-		ad=27, --attack delay
-		ps=4, --proj speed
-		pp=1, --proj pop power
-		phm=false, --proj homing
-		pr=1, --proj pierce
-		pdf=dp_dart, --proj draw func
-		pl=10, --proj lifetime
-		pvr=1, --proj variant
-		pmom=1, --proj moab dmg multi
-		phfn=nil, --proj hit func
-		pshfn=nil, --post shoot func
-		plead=false,	--lead
-	}
-	bomb_proj = merge(base_proj,{
-		ad=33,
-		ps=2,
-		pbr=8,
-		pl=20,
-		phfn=ph_bomb,
-		pdf=dp_bomb,
-		pfrag=false,
-		pfragbmb=false,
-		pbig=false,
-	})
+	-- 	a --atack func
+	-- 	amt --times to loop proj
+	-- 	ad --attack delay
+	-- 	ps --proj speed
+	-- 	pp --proj pop power
+	-- 	phm --proj homing
+	-- 	pr --proj pierce
+	-- 	pdf --proj draw func
+	-- 	pl --proj lifetime
+	-- 	pvr --proj variant
+	-- 	pmom --proj moab dmg multi
+	-- 	phfn --proj hit func
+	-- 	pshfn --post shoot func
+	-- 	plead	--lead
+	base_proj = process_usl({}, [[setd a reg_attack
+set amt 1
+set ad 27
+set ps 4
+set pp 1
+set phm 0
+set pr 1
+setd pdf dp_dart
+set pl 10
+set pvr 1
+set pmom 1
+set plead 0]])
+	def_projs = {base_proj}
+
+	bomb_proj = process_usl(deep(base_proj), [[set ad 33
+set ps 2
+set pbr 8
+set pl 20
+setd phfn ph_bomb
+setd pdf dp_bomb
+set pfragbmb 0
+set pbig 0
+set pfrag 0]]
+	)
 	
-	grape_shot_proj = merge(base_proj, {
-		pdf=dp_grape,
-		ad=0,
-		pr=2,
-		paof=50,
-		a=triple_attack,
-	})
+	grape_shot_proj = process_usl(deep(base_proj), [[setd pdf dp_grape
+set ad 0
+set pr 2
+set paof 50
+setd a triple_attack]])
 	
-	boat_bomb_proj = merge(base_proj, {
-		ad=0,
-		ps=2,
-		pbr=8,
-		pl=20,
-		phfn=ph_bomb,
-		pdf=dp_bomb,
-		pfrag=false,
-		pfragbmb=false,
-		pbig=false,
-	})
+	boat_bomb_proj = process_usl(deep(base_proj), [[set ad 0
+set ps 2
+set pbr 8
+set pl 20
+setd phfn ph_bomb
+setd pdf dp_bomb
+set pfrag 0
+set pfragbmb 0
+set pbig 0]])
 	
-	lightning_bolt_proj = merge(base_proj, {
-		ad=0,
-		pdf=0,
-		phfn=ph_lightning
-	})
-	whirlwind_proj = merge(base_proj, {
-		phfn=ph_whirlwind,
-		pl=49,
-		pr=30,
-		pdf=dp_whirlwind,
-		anim=0,
-		ps=2,
-		hit={},
-		ad=33,
-	})
-	fireball_proj = merge(base_proj, {
-		ad=5,
-		pdf=dp_fireball,
-		phfn=ph_fireball,
-		plead=true,
-		ps=2,
-	})
+	lightning_bolt_proj = process_usl(deep(base_proj), [[set ad 0
+set pdf 0
+setd phfn ph_lightning]])
+
+	whirlwind_proj = process_usl(deep(base_proj), [[setd phfn ph_whirlwind
+set pl 49
+set pr 30
+setd pdf dp_whirlwind
+set anim 0
+set ps 2
+setdc hit empty_o
+set ad 33]])
+
+	fireball_proj = process_usl(deep(base_proj), [[set ad 5
+setd pdf dp_fireball
+setd phfn ph_fireball
+set plead 1
+set ps 2]])
 
 	dart = new_mk({
 		cs={
@@ -1136,7 +1164,6 @@ set r 2.9]]},
 			{120,66,"longer range",[[set r 3.4
 setm ccs 3
 set camo 1]]},
---todo: camo should be true
 			{500,67,"spikeball",[[set i 16
 sel projs 1
 add pr 17
@@ -1207,7 +1234,6 @@ setd pdf dp_blade]]},
 sel projs 1
 set plead 1
 add pp 2]]},
-			--todo: plead should be true},
 			{2200,72,"pop 7 layers!",[[setm ccs 3
 sel projs 1
 add pp 3]]},
@@ -1231,7 +1257,7 @@ set ad 15]]},
 			pr=1,
 			pp=2,
 			ad=66,
-			plead=false,
+			plead=0,
 			pmom=1,
 			a=sniper_attack,
 		}},
@@ -1263,7 +1289,7 @@ set amt 2]]}
 			{250,84,"seeking shuriken",[[setm ccs 3
 sel projs 1
 set phm 1
-add pl 10]]},--todo: phm should be true not 1
+add pl 10]]},
 			{350,85,"distraction",[[setm ccs 4
 sel projs 1
 setd phfn ph_stun]]},
@@ -1293,7 +1319,7 @@ setd phfn ph_stun]]},
 			{ad=16,a=0} --second proj
 		},							--only delay
 		r=2.9,
-		camo=true
+		camo=1
 	})
 	bomb_shtr = new_mk({
 		cs={
@@ -1309,11 +1335,11 @@ setd phfn ph_stun]]},
 add r 0.3]]},
 			{300,78,"frag bombs",[[setm ccs 3
 sel projs 1
-set pfrag 1]] --todo: pfrag should be true
+set pfrag 1]] 
 },
 			{800,79,"cluster bombs",function (this)
 				this.ccs=max(4,this.ccs)
-				this.projs[1].pfragbmb = true
+				this.projs[1].pfragbmb = 1
 				if this.i != 4 then
 					this.ccs=6
 				end
@@ -1378,7 +1404,7 @@ setd 3 boat_bomb_proj]]},
 			pr=5,
 			pp=1,
 			ad=30,
-			plead=false,
+			plead=0,
 		}},
 		c=525,
 		i=10,
@@ -1521,7 +1547,7 @@ setd 2 ballistic_proj]]},
 		projs={{
 			ad=23,
 			pdf=dp_sub_dart,
-			phm=true,
+			phm=1,
 			amt=3,
 			pl=60,
 		}},
@@ -1591,6 +1617,10 @@ function process_usl(mk,usl)
 			--setd will read from global
 			--variables
 			t[p[2]] = _ENV[p[3]]
+		elseif p[1] == "setdc" then
+			--setd will read from global
+			--variables
+			t[p[2]] = deep(_ENV[p[3]])
 		elseif p[1] == "addp" then
 			--addp will add property val
 			--of arg 3 to property of
@@ -1605,6 +1635,7 @@ function process_usl(mk,usl)
 			stop()
 		end
 	end
+	return mk
 end
 
 function update_monkeys()
@@ -1685,7 +1716,7 @@ function bloons_near(pos,r,camo)
 	tx = pos[1]
 	ty = pos[2]
 	for v in all(bloons) do
-		if v.t > 100 and camo == false then
+		if v.t > 100 and camo == 0 then
 			goto continue
 		end
 		x = v.p[1]+4
@@ -1710,7 +1741,7 @@ function bloon_near(pos,r,sort,camo)
 	b = {0,0,0,0,0}
 	bs = nil
 	for k,v in pairs(bloons) do
-		if v.t > 100 and camo == false then
+		if v.t > 100 and camo == 0 then
 			goto continue
 		end
 		x = v.p[1]+4
@@ -1975,7 +2006,7 @@ function update_proj()
 						end
 
 						--check if can home
-						if v.phm != false then
+						if v.phm == 1 then
 							b,dx,dy,d,bi = bloon_near(v.p,20,0,v.camo)
 							--dont home if very close
 							if d > 3 then
@@ -2205,7 +2236,7 @@ function ph_bomb(this)
 				pbig=false,
 				pbr=8,
 			}
-			if this.pfragbmb == true then
+			if this.pfragbmb == 1 then
 				nproj.phfn = ph_bomb
 			end
 			spwn_proj(
