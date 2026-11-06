@@ -1,95 +1,109 @@
+waves = '''25|20,red
+ 15|30,red
+ 15|20,red|5,blue
+ 15|30,red|15,blue
+ 15|5,red|25,blue
+ 15|15,red|15,blue|4,green
+ 15|20,red|25,blue|5,green
+ 15|10,red|20,blue|14,green
+ 15|30,green
+ 13|102,blue
+ 15|10,red|10,blue|12,green|2,yellow
+ 15|15,blue|10,green|5,yellow
+ 8|100,red|23,green|4,yellow
+ 13|49,red|15,blue|10,green|9,yellow
+ 15|20,red|12,green|5,yellow|3,pink
+ 15|20,green|7,yellow|4,pink
+ 15|7,yellow
+ 11|70,green
+ 15|10,green|4,yellow|5,yellow|6,pink
+ 15|6,black
+ 15|14,pink
+ 15|7,white
+ 15|5,black|4,white
+ 15|1,green+
+ 15|31,yellow
+ 15|23,pink|4,lead
+ 6|120,red|55,blue|45,green|45,yellow
+ 15|4,lead
+ 15|25,yellow|12,pink
+ 15|9,lead
+ 15|8,zebra|2,zebra
+ 15|25,black|28,white|8,lead
+ 25|20,yellow+
+ 13|140,yellow|5,zebra
+ 15|35,pink|25,white|5,rainbow
+ 15|81,pink
+ 15|20,black|20,white|7,white+|15,lead|10,zebra
+ 15|42,pink|17,white|14,lead|10,zebra|4,rainbow
+ 15|10,black|10,white|20,lead|20,zebra|18,rainbow
+ 15|10,rainbow|4,ceramic
+ 15|60,black|60,zebra
+ 15|6,rainbow+|6,rainbow
+ 15|10,rainbow|7,ceramic
+ 15|50,zebra
+ 8|200,pink|8,lead|25,rainbow
+ 15|1,moab
+ 15|70,pink+|12,ceramic
+ 8|120,pink|50,rainbow
+ 10|200,green|20,zebra|20,rainbow|10,rainbow|18,ceramic
+ 20|20,red|8,lead|20,ceramic|2,moab
+ 15|10,rainbow|28,ceramic
+ 15|25,rainbow|10,ceramic|2,moab
+ 15|80,pink+|3,moab
+ 15|35,ceramic|2,moab
+ 15|45,ceramic|1,moab
+ 15|40,rainbow|1,moab
+ 15|40,rainbow|4,moab
+ 15|29,ceramic|5,moab
+ 17|28,lead+|50,ceramic
+ 15|1,bfb
+ 11|150,zebra|5,moab
+ 8|300,pink+|15,rainbow+|6,moab
+ 11|75,lead|122,ceramic
+ 15|9,moab
+ 13|100,zebra|70,rainbow|50,ceramic|3,moab|2,bfb
+ 25|12,moab
+ 15|15,ceramic|10,moab
+ 25|4,moab|1,bfb
+ 13|60,lead|70,ceramic
+ 6|200,rainbow+|4,moab
+ 15|30,ceramic|10,moab
+ 15|38,ceramic|2,bfb
+ 22|9,moab|1,bfb
+ 11|200,ceramic|1,bfb
+ 13|28,lead|4,moab|3,bfb
+ 13|60,ceramic
+ 23|14,moab|5,bfb
+ 6|150,rainbow|75,ceramic+|1,bfb
+ 4|500,rainbow|7,bfb
+ 28|31,moab
+ 30|9,bfb
+ 3|400,rainbow+|10,bfb
+ 6|150,ceramic|30,moab
+ 25|50,moab|10,bfb
+ 30|1,zomg
+'''.strip()
+# round 49 should be 343 greens actually, 
+# but i cut it down since it takes forever
+
 import pyperclip
 
-waves = '''
- 25|20,1
- 15|30,1
- 15|20,1|5,2
- 15|30,1|15,2
- 15|5,1|25,2
- 15|15,1|15,2|4,3
- 15|20,1|25,2|5,3
- 15|10,1|20,2|14,3
- 15|30,3
- 15|102,2
- 15|10,1|10,2|12,3|2,4
- 15|15,2|10,3|5,4
- 15|100,1|23,3|4,4
- 15|49,1|15,2|10,3|9,4
- 15|20,1|12,3|5,4|3,5
- 15|20,3|7,4|4,5
- 15|7,4
- 15|70,3
- 15|10,3|4,4|5,4|6,5
- 15|6,6
- 15|14,5
- 15|7,7
- 15|5,6|4,7
- 15|1,3c
- 15|31,4
- 15|23,5|4,9
- 10|120,1|55,2|45,3|45,4
- 15|4,9
- 15|25,4|12,5
- 15|9,9
- 15|8,8|2,8
- 15|25,6|28,7|8,9
- 25|20,4c
- 15|140,4|5,8
- 15|35,5|25,7|5,10
- 15|81,5
- 15|20,6|20,7|7,7c|15,9|10,8
- 15|42,5|17,7|14,9|10,8|4,10
- 15|10,6|10,7|20,9|20,8|18,10
- 15|10,10|4,11
- 15|60,6|60,8
- 15|6,10c|6,10
- 15|10,10|7,11
- 15|50,8
- 10|200,5|8,9|25,10
- 15|1,12
- 15|70,5c|12,11
- 10|120,5|50,10
- 10|343,3|20,8|20,10|10,10|18,11
- 20|20,1|8,9|20,11|2,12
- 15|10,10|28,11
- 15|25,10|10,11|2,12
- 15|80,5c|3,12
- 15|35,11|2,12
- 15|45,11|1,12
- 15|40,10|1,12
- 15|40,10|4,12
- 15|29,11|5,12
- 17|28,9c|50,11
- 15|1,13
-'''
-
 bloon_types = [
-	#red 1
-	[1/2,192,1,[],[],1,1],
-	#blue 2
-	[1.5/2,192,1,[1],[[8,12],[14,13],[2,1]],1,2],
-	#green 3
-	[1.8/2,192,1,[2],[[8,11],[14,4],[2,3]],1,3],
-    #yellow 4
-	[3.2/2,192,1,[3],[[8,10],[14,7],[2,9]],1,4],
-    #pink 5
-	[1.8/2,192,1,[4],[[8,14],[14,7]],1,5],
-    #black 6
-	[1.8/2,192,1,[4,4,5,5],[[8,0]],1,11],
-    #white 7
-	[2/2,192,1,[4,4,5,5],[[8,7],[14,5],[2,6]],1,11],
-    #zebra 8
-	[3/2,193,1,[6,7],[[5,0]],1,23],
-    #lead 9
-	[1.8/2,194,1,[6,6],[],1,23],
-    #rainbow 10
-	[2.2/2,195,1,[8],[],1,47],
-    #ceramic 11
-	[2.5/2,196,1,[10,10],[],10,104],
-    #moab
-	[1/2,204,2,[11,11,11,11],[],200,616,True],
-    #bfb
-	[0.34/2,236,2,[12,12,12,12],[],700,3164,True],
+	["red",1/2,192,1,[],[],1,1],
+	["blue",1.5/2,192,1,[1],[[8,12],[14,13],[2,1]],1,2],
+	["green",1.8/2,192,1,[2],[[8,11],[14,4],[2,3]],1,3],
+	["yellow",3.2/2,192,1,[3],[[8,10],[14,7],[2,9]],1,4],
+	["pink",1.8/2,192,1,[4],[[8,14],[14,7]],1,5],
+	["black",1.8/2,192,1,[4,4,5,5],[[8,0]],1,11],
+	["white",2/2,192,1,[4,4,5,5],[[8,7],[14,5],[2,6]],1,11],
+	["zebra",3/2,193,1,[6,7],[[5,0]],1,23],
+	["lead",1.8/2,194,1,[6,6],[],1,23],
+	["rainbow",2.2/2,195,1,[8],[],1,47],
+	["ceramic",2.5/2,196,1,[10,10],[],10,104],
+	["moab",1/2,204,2,[11,11,11,11],[],200,616,True],
+	["bfb",0.34/2,236,2,[12,12,12,12],[],700,3164,True],
+	["zomg",0.18/2,232,2,[13,13,13,13],[],700,4000,True],
 ]
 
 maps = [
@@ -100,10 +114,41 @@ maps = [
 	[28,[5,15],[5,12],[3,12],[3,10],[2,10],[2,2],[6,2],[6,3],[14,3],[14,13],[13,13],[13,14],[8,14],[8,15]]
 ]
 
+# replace waves with proper waves
+new = ""
+for wave in waves.split("\n"):
+	bloons = []
+	parts = wave.split("|")
+	speed = parts.pop(0)
+	for item in parts:
+		p = item.split(",")
+		amt = p[0]
+		ty = p[1]
+		camo = False
+		if ty.endswith("+"):
+			ty = ty[:len(ty)-1]
+			camo = True
+
+		# resolve name to index
+		for idx,bt in enumerate(bloon_types):
+			if bt[0] == ty:
+				ty = idx+1
+				break
+		if isinstance(ty, str):
+			print(f"bad entry: {repr(ty)}")
+			exit(1)
+
+		if camo:
+			ty = str(ty+100)
+		bloons.append(f"{amt},{ty}")
+	new += f"{speed}|{'|'.join(bloons)}\n"
+waves = new[:len(new)-1]
+
 # encode bloon_types to WLF:
 # s,i,s,h,ST,dmg,6060,EPF,UPT
 bloon_types_wlf = ""
 for bt in bloon_types:
+	bt = bt[1::]
 	if len(bt) <= 7:
 		bt.append(False)
 	bloon_types_wlf += f" {bt[0]}|1,{bt[1]}|1,{bt[2]}|1,{bt[5]}|1,{bt[6]}"
@@ -131,8 +176,8 @@ maps_wlf = maps_wlf[:-1]
 
 text = f'''--game data raw
 waves = load_wlf([[{waves}]])
-bloon_types = load_wlf([[\n{bloon_types_wlf}\n]])
-maps = load_wlf([[\n{maps_wlf}\n]])'''
+bloon_types = load_wlf([[{bloon_types_wlf}]])
+maps = load_wlf([[{maps_wlf}]])'''
 
 print(text)
 pyperclip.copy(text)
