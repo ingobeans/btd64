@@ -1035,8 +1035,7 @@ function new_mk(t)
 	-- 	ui1=1, --upgrade index 1
 	-- 	ui2=1 --upgrade index 2
 	-- }
-	base = {}
-	process_usl(base, [[set ccs 1
+	base = process_usl({}, [[set ccs 1
 set vl 0
 set c 200
 set wb 0
@@ -1093,8 +1092,7 @@ function def_monkeys()
 	-- 	phfn --proj hit func
 	-- 	pshfn --post shoot func
 	-- 	plead	--lead
-	base_proj = {}
-	process_usl(base_proj, [[setd a reg_attack
+	base_proj = process_usl({}, [[setd a reg_attack
 set amt 1
 set ad 27
 set ps 4
@@ -1108,8 +1106,7 @@ set pmom 1
 set plead 0]])
 	def_projs = {base_proj}
 
-	bomb_proj = deep(base_proj)
-	process_usl(bomb_proj, [[set ad 33
+	bomb_proj = process_usl(deep(base_proj), [[set ad 33
 set ps 2
 set pbr 8
 set pl 20
@@ -1120,15 +1117,13 @@ set pbig 0
 set pfrag 0]]
 	)
 	
-	grape_shot_proj = deep(base_proj)
-	process_usl(grape_shot_proj, [[setd pdf dp_grape
+	grape_shot_proj = process_usl(deep(base_proj), [[setd pdf dp_grape
 set ad 0
 set pr 2
 set paof 50
 setd a triple_attack]])
 	
-	boat_bomb_proj = deep(base_proj)
-	process_usl(boat_bomb_proj, [[set ad 0
+	boat_bomb_proj = process_usl(deep(base_proj), [[set ad 0
 set ps 2
 set pbr 8
 set pl 20
@@ -1138,13 +1133,11 @@ set pfrag 0
 set pfragbmb 0
 set pbig 0]])
 	
-	lightning_bolt_proj = deep(base_proj)
-	process_usl(lightning_bolt_proj, [[set ad 0
+	lightning_bolt_proj = process_usl(deep(base_proj), [[set ad 0
 set pdf 0
 setd phfn ph_lightning]])
 
-	whirlwind_proj = deep(base_proj)
-	process_usl(whirlwind_proj, [[setd phfn ph_whirlwind
+	whirlwind_proj = process_usl(deep(base_proj), [[setd phfn ph_whirlwind
 set pl 49
 set pr 30
 setd pdf dp_whirlwind
@@ -1153,8 +1146,7 @@ set ps 2
 setdc hit empty_o
 set ad 33]])
 
-	fireball_proj = deep(base_proj)
-	process_usl(fireball_proj, [[set ad 5
+	fireball_proj = process_usl(deep(base_proj), [[set ad 5
 setd pdf dp_fireball
 setd phfn ph_fireball
 set plead 1
@@ -1643,6 +1635,7 @@ function process_usl(mk,usl)
 			stop()
 		end
 	end
+	return mk
 end
 
 function update_monkeys()
