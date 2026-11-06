@@ -7,15 +7,15 @@ waves = '''25|20,red
  15|20,red|25,blue|5,green
  15|10,red|20,blue|14,green
  15|30,green
- 15|102,blue
+ 13|102,blue
  15|10,red|10,blue|12,green|2,yellow
  15|15,blue|10,green|5,yellow
- 15|100,red|23,green|4,yellow
- 15|49,red|15,blue|10,green|9,yellow
+ 8|100,red|23,green|4,yellow
+ 13|49,red|15,blue|10,green|9,yellow
  15|20,red|12,green|5,yellow|3,pink
  15|20,green|7,yellow|4,pink
  15|7,yellow
- 15|70,green
+ 11|70,green
  15|10,green|4,yellow|5,yellow|6,pink
  15|6,black
  15|14,pink
@@ -24,14 +24,14 @@ waves = '''25|20,red
  15|1,green+
  15|31,yellow
  15|23,pink|4,lead
- 10|120,red|55,blue|45,green|45,yellow
+ 6|120,red|55,blue|45,green|45,yellow
  15|4,lead
  15|25,yellow|12,pink
  15|9,lead
  15|8,zebra|2,zebra
  15|25,black|28,white|8,lead
  25|20,yellow+
- 15|140,yellow|5,zebra
+ 13|140,yellow|5,zebra
  15|35,pink|25,white|5,rainbow
  15|81,pink
  15|20,black|20,white|7,white+|15,lead|10,zebra
@@ -42,11 +42,11 @@ waves = '''25|20,red
  15|6,rainbow+|6,rainbow
  15|10,rainbow|7,ceramic
  15|50,zebra
- 10|200,pink|8,lead|25,rainbow
+ 8|200,pink|8,lead|25,rainbow
  15|1,moab
  15|70,pink+|12,ceramic
- 10|120,pink|50,rainbow
- 10|343,green|20,zebra|20,rainbow|10,rainbow|18,ceramic
+ 8|120,pink|50,rainbow
+ 10|200,green|20,zebra|20,rainbow|10,rainbow|18,ceramic
  20|20,red|8,lead|20,ceramic|2,moab
  15|10,rainbow|28,ceramic
  15|25,rainbow|10,ceramic|2,moab
@@ -59,6 +59,8 @@ waves = '''25|20,red
  17|28,lead+|50,ceramic
  15|1,bfb
 '''.strip()
+# round 49 should be 343 greens actually, 
+# but i cut it down since it takes forever
 
 import pyperclip
 
