@@ -1,7 +1,4 @@
-import pyperclip
-
-waves = '''
- 25|20,1
+waves = '''25|20,1
  15|30,1
  15|20,1|5,2
  15|30,1|15,2
@@ -61,7 +58,9 @@ waves = '''
  15|29,11|5,12
  17|28,9c|50,11
  15|1,13
-'''
+'''.strip()
+
+import pyperclip
 
 bloon_types = [
 	#red 1
@@ -131,8 +130,8 @@ maps_wlf = maps_wlf[:-1]
 
 text = f'''--game data raw
 waves = load_wlf([[{waves}]])
-bloon_types = load_wlf([[\n{bloon_types_wlf}\n]])
-maps = load_wlf([[\n{maps_wlf}\n]])'''
+bloon_types = load_wlf([[{bloon_types_wlf}]])
+maps = load_wlf([[{maps_wlf}]])'''
 
 print(text)
 pyperclip.copy(text)
