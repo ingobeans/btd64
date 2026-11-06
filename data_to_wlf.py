@@ -58,6 +58,31 @@ waves = '''25|20,red
  15|29,ceramic|5,moab
  17|28,lead+|50,ceramic
  15|1,bfb
+ 11|150,zebra|5,moab
+ 8|300,pink+|15,rainbow+|6,moab
+ 11|75,lead|122,ceramic
+ 15|9,moab
+ 13|100,zebra|70,rainbow|50,ceramic|3,moab|2,bfb
+ 25|12,moab
+ 15|15,ceramic|10,moab
+ 25|4,moab|1,bfb
+ 13|60,lead|70,ceramic
+ 6|200,rainbow+|4,moab
+ 15|30,ceramic|10,moab
+ 15|38,ceramic|2,bfb
+ 22|9,moab|1,bfb
+ 11|200,ceramic|1,bfb
+ 13|28,lead|4,moab|3,bfb
+ 13|60,ceramic
+ 23|14,moab|5,bfb
+ 6|150,rainbow|75,ceramic+|1,bfb
+ 4|500,rainbow|7,bfb
+ 28|31,moab
+ 30|9,bfb
+ 3|400,rainbow+|10,bfb
+ 6|150,ceramic|30,moab
+ 25|50,moab|10,bfb
+ 30|1,zomg
 '''.strip()
 # round 49 should be 343 greens actually, 
 # but i cut it down since it takes forever
@@ -78,6 +103,7 @@ bloon_types = [
 	["ceramic",2.5/2,196,1,[10,10],[],10,104],
 	["moab",1/2,204,2,[11,11,11,11],[],200,616,True],
 	["bfb",0.34/2,236,2,[12,12,12,12],[],700,3164,True],
+	["zomg",0.18/2,232,2,[13,13,13,13],[],700,4000,True],
 ]
 
 maps = [
