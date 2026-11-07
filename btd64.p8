@@ -819,7 +819,7 @@ function menu_input()
 		m = monkeys[in_menu]
 		if btnp(❎) then
 			if menu_crsr == 3 then
-				cash += flr(m.vl*sell_percent+0.5)
+				cash += ceil(m.vl*sell_percent)
 				in_menu = -1
 				sfx(11)
 				del(monkeys,m)
@@ -968,7 +968,7 @@ function draw_menu()
 	
 		--sell button	
 		rectborder(80,40,127,50,8,15)
-		print("sell $"..flr(m.vl*sell_percent+0.5),83,42,15)
+		print("sell $"..ceil(m.vl*sell_percent),83,42,15)
 		
 		if mousem == false or omx >= 80 then
 			spr(64,72,menu_crsr*10+10)
@@ -2320,26 +2320,30 @@ function save_mk(mk, i)
 end
 
 function load_mk(v)
-	ti = v >> 12 & 0xf
-	px = v >> 8 & 0xf
-	py = v >> 4 & 0xf
-	ui1 = v & 0xf
-	ui2 = v << 4 & 0xf
-	tg = v << 8 & 0xf
+	-- ti = v >> 12 & 0xf
+	local mk = deep(monkey_types[v >> 12 & 0xf])
+
+	-- px = v >> 8 & 0xf
+	-- py = v >> 4 & 0xf
+	mk.p = {(v >> 8 & 0xf) *8+4, (v >> 4 & 0xf) *8+4}
+	mk.tg = v << 8 & 0xf
+
 	a = v << 12 & 0xf
-	local mk = deep(monkey_types[ti])
-	mk.p = {px*8+4, py*8+4}
-	mk.tg = tg
 	mk.lar = {sin(a/15),cos(a/15)}
-	mk.ui1 = ui1
-	mk.ui2 = ui2
+
+	mk.ui1 = v & 0xf
+	mk.ui2 = v << 4 & 0xf
 	
 	--load all upgrades
-	ud={
-		{ui1,mk.u1},
-		{ui2,mk.u2}
-	}
-	for cud in all(ud) do
+	-- ud={
+	-- 	{mk.ui1,mk.u1},
+	-- 	{mk.ui2,mk.u2}
+	-- }
+	for cud in all({
+		{mk.ui1,mk.u1},
+		{mk.ui2,mk.u2}
+	})
+	do
 		for ui=1,cud[1]-1 do
 			u=cud[2][ui]
 			process_usl(mk,u[4])
