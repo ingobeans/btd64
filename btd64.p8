@@ -34,6 +34,10 @@ lead_id = 9
 save_g = 0
 sell_percent = 0.8
 
+-- money earned per round is
+-- reduced after round 50
+earn_percent = 1.0
+
 function _init()
 	def_monkeys()
 	loads()
@@ -194,14 +198,12 @@ function spwn_bloons()
 				spawning = false
 			end
 		end
-	elseif playing then
-		if #bloons == 0 then
-			cash += 100
-			playing = false
-			saves()
-			if round == 85 then
-				ends = 2
-			end
+	elseif playing and #bloons == 0 then
+		cash += 100
+		playing = false
+		saves()
+		if round == 85 then
+			ends = 2
 		end
 	end
 end
