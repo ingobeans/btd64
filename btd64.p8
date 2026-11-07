@@ -247,6 +247,11 @@ function _draw()
 			print("press ❎ to return",30,118)
 		end
 	end
+
+	if reset_update60 then
+		reset_update60 = false
+		_update60 = nil
+	end
 end
 
 function _update()
@@ -792,7 +797,11 @@ function menu_input()
 					_update60 = _update
 				else
 					_set_fps(30)
-					_update60 = nil
+
+					--setting reset_update60
+					--to true makes _update_60
+					--be safely set to nil
+					reset_update60 = true
 				end
 			else
 				mt = monkey_types[menu_crsr-1]
