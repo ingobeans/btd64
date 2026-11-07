@@ -18,6 +18,7 @@ The code is really unreadable because of all the dumb techniques used to cram as
 - Monkey targeting options
 - Monkeys change sprites when upgraded
 - Double speed mode
+- MOABs, BFBs and the ZOMG
 
 # Todo
 
