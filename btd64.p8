@@ -510,7 +510,7 @@ function draw_bloons()
 			mnx = v.lmd[1]/md
 			mny = v.lmd[2]/md
 			a = atan2(mny,mnx)+0.25
-			spr_r(img, v.p[1]-4, v.p[2]-4, a, bs, bs)
+			spr_r(img, v.p[1]-4, v.p[2]-4, a, bs)
 		else
 			spr(img, v.p[1], v.p[2], bs, bs)
 		end
@@ -1609,7 +1609,7 @@ function draw_monkeys()
 			end
 			pal(c[1],to)
 		end
-		spr_r(v.i, v.p[1]-4, v.p[2]-4,a,1,1)
+		spr_r(v.i, v.p[1]-4, v.p[2]-4,a,1)
 		pal()
 		palt()
 		if crsr[1]*8 == v.p[1]-4 and
@@ -2366,19 +2366,17 @@ function deep(org)
 	return t
 end
 
-function spr_r(s,x,y,a,w,h)
-	rspr(flr(s%16)*8,flr(s/16)*8,48,112,a,w)
- sspr(48,112,8*w,8*w,x,y,8*w,8*w)
-end
-
 rspr_clear_col=0
+--8012
 
-function rspr(sx,sy,x,y,a,w)
+function spr_r(s,tx,ty,a,ww)
+	local sx = flr(s%16)*8
+	local sy = flr(s/16)*8
 	local ca,sa=cos(a),sin(a)
 	local srcx,srcy,addr,pixel_pair
 	local ddx0,ddy0=ca,sa
-	local mask=shl(0xfff8,(w-1))
-	w*=4
+	local mask=shl(0xfff8,(ww-1))
+	local w = ww * 4
 	ca*=w-0.5
 	sa*=w-0.5
 	local dx0,dy0=sa-ca+w,-ca-sa+w
@@ -2388,9 +2386,9 @@ function rspr(sx,sy,x,y,a,w)
 		for iy=0,w do
 			if band(bor(srcx,srcy),mask)==0 then
 				local c=sget(sx+srcx,sy+srcy)
-				sset(x+ix,y+iy,c)
+				sset(48+ix,112+iy,c)
 			else
-				sset(x+ix,y+iy,rspr_clear_col)
+				sset(48+ix,112+iy,rspr_clear_col)
 			end
 			srcx-=ddy0
 			srcy+=ddx0
@@ -2398,6 +2396,7 @@ function rspr(sx,sy,x,y,a,w)
 		dx0+=ddx0
 		dy0+=ddy0
 	end
+ 	sspr(48,112,8*ww,8*ww,tx,ty)
 end
 
 
