@@ -17,8 +17,6 @@ function load_wlf(wlf)
 		for i,c in pairs(d) do
 				if i != 1 then
 					local vs = split(c,",")
-					--if data has c at end,
-					--make camo
 					cbt = vs[2]
 					for b=1,vs[1] do
 						add(w,cbt)
